@@ -1,0 +1,46 @@
+# ManoMatika product manifest (BOM) — SCHEMA TEMPLATE
+#
+# One manifest per ManoMatika product version, authored at release time
+# (task #11). Copy this file to manifests/<version>.yaml and fill in the
+# placeholders. Repo slugs are ALWAYS lowercase. Do not commit a manifest
+# with unresolved placeholders as a real release.
+
+# The ManoMatika product version this manifest describes.
+# (Product name is a proper noun; the version is the product's own version,
+#  distinct from any component version.)
+product: ManoMatika
+version: vX.Y.Z
+
+# Lifecycle of THIS manifest: 'candidate' while assembling/QA, 'released'
+# once the product release is cut and the installer attached.
+status: candidate
+
+# Date the product release was cut (YYYY-MM-DD). Omit until released.
+released: null
+
+# THE BOM. Each component is pinned by BOTH an exact git tag AND the full
+# 40-char commit SHA that tag resolves to. No ranges, no wildcards. The SHA
+# is the authority; the tag is the human-readable handle.
+components:
+  - repo: manomatika/matika
+    tag: vX.Y.Z
+    sha: "<full 40-char commit SHA the tag resolves to>"
+  - repo: manomatika/eyerate
+    tag: vX.Y.Z
+    sha: "<full 40-char commit SHA the tag resolves to>"
+  - repo: manomatika/ahimsa
+    tag: vX.Y.Z
+    sha: "<full 40-char commit SHA the tag resolves to>"
+
+# The single validated installer hosted on this product release.
+# Installed identity is a proper noun, so the filename stays capitalized.
+installer:
+  filename: "Matika-<version>-x86_64.dmg"
+  platform: "macos-x86_64"
+  sha256: "<sha256 of the validated artifact>"
+
+# Reference to the QA validation that gated this release.
+qa:
+  suite: "<e.g. TC-B smoke-test>"
+  result: "<pass>"
+  reference: "<link or ref to the QA record>"
