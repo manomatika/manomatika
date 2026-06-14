@@ -1,14 +1,15 @@
 # ManoMatika v0.0.1 — Execution Plan
-**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`)  
+**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`); 2026-06-14 (preconditions resolved, phase model added, #1–#3 marked complete)  
 **Composition (the blessed triple):** matika v0.0.4 + eyerate v0.0.4 + ahimsa v0.0.1  
 **Planner:** Claude Code, read-only investigation
 
 > **2026-06-09 redesign.** The release architecture was redesigned. A new repo `manomatika/manomatika` (**mm** below) is now the **product authority**. `ahimsa` narrows to a **recipe engine**. The authoritative model is **§0**; the authoritative ordered sequence is **§1**. The old Wave 1–6 orchestration and the "RELEASES.md / recipes / hosted release live in ahimsa" model are **superseded** — see §3, §5, §8, and the Appendix for what was retired and why.
 
 ### Execution-intent key
-- **[AGENT PR]** — A cc subagent creates a git worktree, does the work, opens a PR, removes the worktree. The human reviews and merges every PR.
-- **[HUMAN]** — Requires the human; cc cannot substitute (QA on clean machines, all PR merges, repo creation/renames in GitHub Settings, manual cross-repo issue closes, tagging, cutting the product release).
-- **[cc MUTATION]** — GitHub state change (milestone/issue/Project mutation, comment) executed autonomously by cc during the execution run under standing permission. Not performed in this planning run.
+- **[AGENT PR]** — cc opens a PR (git worktree); the human reviews and merges every PR.
+- **[HUMAN]** — Requires the human; cc cannot substitute (QA on clean machines, all PR merges, repo renames in GitHub Settings, manual cross-repo issue closes, tagging, cutting the product release).
+- **[cc MUTATION]** — GitHub state change executed autonomously by cc under standing permission.
+- **[COMPLETE]** — Done; recorded for traceability.
 
 ---
 
@@ -27,25 +28,35 @@
 This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes the old Wave 1–6 orchestration (archived in the Appendix).
 
 1. **Settle the CLAUDE.md staleness guardrail.** Rule: CLAUDE.md never knowingly contains stale info; every factual claim is verified against actual repo state on each edit/regeneration; when unverifiable, omit. **[COMPLETE — executed in parallel.]**
-2. **Delete the local `matika v0.0.4-dev.*` tags** (hygiene). Confirm local-vs-remote first before deleting.
-3. **Stand up `manomatika/manomatika` (mm).** Author: README (the product model + the prerelease/build-artifact → QA → product-release flow), the **product-manifest schema** (each component pinned by **tag AND resolved SHA** per product version), CLAUDE.md, and the product-authority role. Add the new repo to **Project #1** via the `addProjectV2ItemById` GraphQL mutation.
-4. **Relocate the reference-app recipe into mm.** Canonical lowercase `manomatika/*` slugs, pinning matika v0.0.4 + eyerate v0.0.4. Repoint ahimsa `build.yml` to **fetch the recipe from mm**. Close **ahimsa#35** and **ahimsa#30** as **superseded** (the recipe leaves ahimsa); delete branch `fix/30-org-migration`.
+2. **Delete the local `matika v0.0.4-dev.*` tags** (hygiene). **[COMPLETE]** — Remote dev tags removed; matika carries v0.0.1/v0.0.2/v0.0.3 only (verified 2026-06-14 against live GitHub).
+3. **Stand up `manomatika/manomatika` (mm).** **[COMPLETE]** — README, CLAUDE.md, `manifests/` directory, and `shell_scripts/` committed to mm (verified 2026-06-14). Add mm issues to **Project #1** via `addProjectV2ItemById` as they are filed.
+4. **Relocate the reference-app recipe into mm.** Author recipe fresh in mm with canonical lowercase `manomatika/*` slugs, pinning matika v0.0.4 + eyerate v0.0.4. Repoint ahimsa `build.yml` to **fetch the recipe from mm**. Close **ahimsa#35** and **ahimsa#30** as superseded; delete branch `fix/30-org-migration`. **Fold in ahimsa#38 non-recipe scope**: update lowercase slug refs in ahimsa `build.yml`, `CLAUDE.md`, `README`, and local remotes; ahimsa#38 closes when both the recipe-URL-casing portion (superseded) and the slug-ref portion resolve. [Precondition confirmed 2026-06-14: `fix/30-org-migration` SAFE to delete — one commit, 2-file org URL migration only, fully superseded by authoring fresh in mm; see §4 item 15.]
 5. **Move the audit log to mm.** Relocate `release-log.yaml` + `RELEASES.md` into mm. **Retarget ahimsa's rendering engine** — the live cross-repo query (**ahimsa#49**) and the `refresh-releases-md` job — to render mm's log from mm-hosted data. (The mechanism stays in ahimsa; the content lives in mm.)
-6. **Retire ahimsa's release responsibility.** Remove the release job and the self-`v*`-tag build trigger. ahimsa builds artifacts **on demand only** (`workflow_dispatch`), and **never** creates GitHub releases.
-7. **Docs refactor.** Author the umbrella **`ARCHITECTURE.md` in mm** (ahimsa-engine + matika + applug, linking down to component docs). Narrow ahimsa docs + CLAUDE.md to the engine (**ahimsa#32**). Verify/finalize matika and eyerate docs **before** they are tagged (**matika#47**, **eyerate#26**).
+6. **Retire ahimsa's release responsibility.** Remove the release job and the self-`v*`-tag build trigger. ahimsa builds artifacts **on demand only** (`workflow_dispatch`), and **never** creates GitHub releases. (manomatika/matika#31 tracked this; CLOSED 2026-06-03; approach superseded — see §4 item 16.)
+7. **Docs refactor.** Author the umbrella **`ARCHITECTURE.md` in mm** (ahimsa-engine + matika + applug, linking down to component docs). Narrow ahimsa docs + CLAUDE.md to the engine (**ahimsa#32**) — the ahimsa-CLAUDE.md piece waits on #4–#6 so it describes the **final** CI shape. Verify/finalize matika and eyerate docs **before** they are tagged (**matika#47**, **eyerate#26**). [Phase 1 docs sub-lane — runs in parallel with machinery sub-lane #4→#6→#5; see Execution phases.]
 8. **Tag matika v0.0.4 + eyerate v0.0.4** (prereleases, notes-only). The recipe pins from step 4 now resolve.
-9. **Dispatch ahimsa `build.yml`** via `workflow_dispatch` off finalized `main` → installer **artifacts, no release**.
+9. **Dispatch ahimsa `build.yml`** via `workflow_dispatch` off finalized `main` → installer **artifacts, no release**. **Presupposes** ahimsa `main` already contains the full build infra (PyInstaller, dmgbuild, Inno Setup — verified 2026-06-14 against live ahimsa main); step 9 exercises it, does not create it.
 10. **QA the macOS x86_64 DMG artifact on Intel hardware** — TC-B suite, smoke-test grade. **arm64 and Windows are out of scope this pass.**
-11. **On pass, cut ManoMatika v0.0.1:** tag **ahimsa v0.0.1** at the exact `main` SHA the validated DMG was built from (notes-only); author the **mm product manifest** pinning matika v0.0.4 / eyerate v0.0.4 / ahimsa v0.0.1 by **tag + resolved SHA**; write the mm product release notes; create the **mm v0.0.1 release with the validated x86_64 DMG attached there**.
+11. **On pass, cut ManoMatika v0.0.1:** tag **ahimsa v0.0.1** at the exact `main` SHA the validated DMG was built from (notes-only); author the **mm product manifest** pinning matika v0.0.4 / eyerate v0.0.4 / ahimsa v0.0.1 by **tag + resolved SHA**; write the mm product release notes; create the **mm v0.0.1 release with the validated x86_64 DMG attached there**. (For v0.0.1 the artifact carry ahimsa-artifact → mm-release-asset is **MANUAL**; automated post-v0.0.1 — see Backlog.)
 12. **Regenerate `RELEASES.md`** via the retargeted engine so the audit log records ManoMatika v0.0.1.
 13. **Close issues this pass satisfied** (matika#33, ahimsa#16, eyerate#17, ahimsa#33). **Record as DEFERRED — not passed:** arm64 (matika#32, ahimsa#15) and Windows (matika#34, ahimsa#19, eyerate#18 → ahimsa#46).
 
 ### Backlog (not in this release — keep noted)
+- **POST-v0.0.1 DECISION (2026-06-14): mm release-assembly workflow** — mm will own a workflow that pulls ahimsa's built CI artifacts and publishes them to the mm product release, automating the manual artifact carry in §1 step 11. Division of labor: **ahimsa BUILDS, mm ASSEMBLES + PUBLISHES** as code. New issue to be filed in mm; see §4 item 18.
 - **Linux install support** — ahimsa#47 (spike; method unspecified; expected to be the most common post-v0.0.1 target).
 - **Signing / notarization** — ahimsa#25.
 - **Playwright tests** — matika#23 (deferred to `Playwright (v0.0.5)`; setup — install, config, ~100 MB browser binaries, four hub-session scenarios — is materially larger than the rest of Cleanup & Tooling).
 - **Registry epic** — ahimsa#20–24.
 - **Tech-debt** — matika#56 (conftest→fixture migration), eyerate#35 (integration conftest sibling-path hardening), eyerate#36 (PR-triggered Python test gate).
+
+### Execution phases
+
+| Phase | Owner | Tasks | Mode |
+|---|---|---|---|
+| **1 — Lane A** | cc + subagents | Machinery sub-lane (SERIAL): #4 → #6 → #5. Docs sub-lane (parallel with machinery): #7, with the ahimsa-CLAUDE.md piece joining after #4–#6 complete. cc opens PRs, never merges. | [AGENT PR] |
+| **2 — Merge & close** | Pat | Review/merge PRs in dependency order. Manually close cross-repo refs (ahimsa#35/#30/#38, any `Closes manomatika/<repo>#N`). Local cleanup (delete `fix/30-org-migration`). **Gate before Phase 3.** | [HUMAN] |
+| **3 — Pre-staging** | cc | Draft mm v0.0.1 release notes + author mm product manifest skeleton. Readies §1 step 11 inputs; does not shorten Lane B. | [AGENT PR] |
+| **4 — Lane B** | Pat + cc | Hard serial chain: #8 → #9 → #10 → #11 → #12 → #13. Step #10 manual on hardware; gated by Pat throughout. | [HUMAN]-gated |
 
 ---
 
@@ -81,7 +92,7 @@ This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes th
 
 > **Architecture-redesign note (2026-06-09):** the status text below was captured against the old model in which the recipe, the audit log (`RELEASES.md`/`release-log.yaml`), and the hosted release all lived in **ahimsa**. Under the current model (§0) the recipe, the audit-log **content**, the product release, and the installer binary live in **mm**; ahimsa keeps only the rendering **engine** and builds installer **artifacts**. Where a row references ahimsa owning the recipe / log / release, treat it as superseded per §1 steps 4–6. Issue *status* (Done/Todo/Deferred) is unchanged.
 
-**Status snapshot: 2026-06-04 (post-release-notes-build + #38-early + CLAUDE.md refresh + lowercasing-pass-merged + board-backfill), derived from live GitHub.** Re-query with `gh issue list --repo manomatika/<repo> --milestone "<name>" --state all` for current state. This snapshot reflects: release-notes engine BUILT + merged (PR-1 ahimsa#50, PR-2 matika#58, PR-3 eyerate#32; ahimsa#48 CLOSED; ahimsa#49 OPEN — **now retargeted to render mm's log per §1 step 5**); #38-early DONE (matika#59, eyerate#33, ahimsa#51); all three CLAUDE.md refreshed (ahimsa#52, matika#60, eyerate#34, docs-only). Milestone rollups unchanged this run. eyerate test suite verified green on main (56/56) — no QA blocker (see §5 R-EYERATE-TESTS). Windows hardware QA deferred (matika#34/ahimsa#19/eyerate#18 → ahimsa#46); remaining open v0.0.1 QA is the macOS x86_64 gate (matika#33, ahimsa#16, eyerate#17 — arm64 #32/#15 now deferred per §1 step 13); Linux spike = ahimsa#47. **2026-06-04 session:** filesystem lowercasing pass MERGED (matika#61, eyerate#37, ahimsa#53) — manual-task PRs closing no tracked milestone issue, so rollups unchanged; Project #1 brought current at **58 items** (GraphQL `totalCount`) via `addProjectV2ItemById`; new eyerate#35/#36 filed on `Planning (v0.0.5)`; Project auto-add toggle **retired** as not feasible on GitHub Free (see §8.6).
+**Status snapshot: 2026-06-04 (post-release-notes-build + #38-early + CLAUDE.md refresh + lowercasing-pass-merged + board-backfill), derived from live GitHub; issue states re-verified 2026-06-14 (see §4 items 15–18).** Re-query with `gh issue list --repo manomatika/<repo> --milestone "<name>" --state all` for current state. This snapshot reflects: release-notes engine BUILT + merged (PR-1 ahimsa#50, PR-2 matika#58, PR-3 eyerate#32; ahimsa#48 CLOSED; ahimsa#49 OPEN — **now retargeted to render mm's log per §1 step 5**); #38-early DONE (matika#59, eyerate#33, ahimsa#51); all three CLAUDE.md refreshed (ahimsa#52, matika#60, eyerate#34, docs-only). Milestone rollups unchanged this run. eyerate test suite verified green on main (56/56) — no QA blocker (see §5 R-EYERATE-TESTS). Windows hardware QA deferred (matika#34/ahimsa#19/eyerate#18 → ahimsa#46); remaining open v0.0.1 QA is the macOS x86_64 gate (matika#33, ahimsa#16, eyerate#17 — arm64 #32/#15 now deferred per §1 step 13); Linux spike = ahimsa#47. **2026-06-04 session:** filesystem lowercasing pass MERGED (matika#61, eyerate#37, ahimsa#53) — manual-task PRs closing no tracked milestone issue, so rollups unchanged; Project #1 brought current at **58 items** (GraphQL `totalCount`) via `addProjectV2ItemById`; new eyerate#35/#36 filed on `Planning (v0.0.5)`; Project auto-add toggle **retired** as not feasible on GitHub Free (see §8.6).
 
 All Project statuses confirmed via GraphQL against Project #1 (ManoMatika Roadmap) — **58 items** (verified via ProjectV2 GraphQL `totalCount`, 2026-06-04; `gh project item-list` serves stale/paginated data and is not used for counts). The new **mm** repo's own issues join Project #1 via `addProjectV2ItemById` as mm is stood up (§1 step 3).
 
@@ -169,7 +180,7 @@ All Project statuses confirmed via GraphQL against Project #1 (ManoMatika Roadma
 | manomatika/ahimsa#19 | Test EXE install on clean Windows 11 | Deferred — no Windows hardware; closed-as-deferred → manomatika/ahimsa#46 |
 | manomatika/ahimsa#26 | release notes: document unsigned-installer limitation | Done — auto-closed by PR #44 (the unsigned-installer prose now lives in notes content; the product release that carries it is mm's, §0) |
 | manomatika/ahimsa#48 | Release-notes generation system: file-based per-repo notes + umbrella | Done — closed by PR #50. **Note:** the audit-log *content* this built in ahimsa **relocates to mm** (§1 step 5); ahimsa keeps the rendering engine only |
-| manomatika/ahimsa#49 | Wire live cross-repo release query (completes stubbed regenerator) | Open — **retargeted** to render **mm's** log from mm-hosted data (§1 step 5) |
+| manomatika/ahimsa#49 | Wire live cross-repo release query against canonicalized refs (completes stubbed regenerator) | Open — **retargeted** to render **mm's** log from mm-hosted data (§1 step 5) |
 
 > **Overlap with matika D&I tracking issues:** matika#26 ⊇ ahimsa#9+#10; matika#29 = ahimsa#13+#14; matika#30 = ahimsa#17+#18. Same physical engine work tracked in both repos; ahimsa PRs reference but do not auto-close the matika issues (manual close required).
 
@@ -280,6 +291,14 @@ Decisions recorded for traceability. Items updated for the 2026-06-09 redesign a
 13. **CLAUDE.md updated for release-notes architecture (2026-06-04):** all three CLAUDE.md files brought current with the shipped release-notes system — ahimsa #52 (`6e01da7`), matika #60 (`4f570cf`), eyerate #34 (`d2f1998`). **Redesign follow-up (§1 step 7):** ahimsa's CLAUDE.md narrows to the **engine**; the umbrella architecture moves to **mm's** `ARCHITECTURE.md`; matika/eyerate docs are re-verified before tagging. The §1-step-1 staleness guardrail governs every CLAUDE.md edit/regeneration.
 
 14. **eyerate test-suite status — VERIFIED GREEN, no QA blocker (2026-06-04):** the full suite passes **56/56** with the correct environment (`PYTHONPATH=src:../matika/src`, eyerate beside the matika clone). The reported "18 failed + 27 errors" was a **setup artifact** — the integration tier `exec_module`s matika's `conftest.py` via a sibling-clone relative path that 404s from a non-sibling location, erroring at collection. **Not a QA blocker.** Lower-severity follow-ups in §5 R-EYERATE-TESTS. **(Valid.)**
+
+15. **`fix/30-org-migration` precondition resolved (2026-06-14):** confirmed SAFE to delete branch `fix/30-org-migration` and close ahimsa#30 and ahimsa#35 as superseded. The branch carries exactly one commit (2026-05-30) changing only `recipes/reference-app/recipe.json` and `CLAUDE.md` (4 URL lines: pjtallman/* → manomatika/*). That work is entirely superseded by authoring the recipe fresh in mm (§1 step 4). No unique work would be orphaned.
+
+16. **manomatika/matika#31 closed + superseded (2026-06-14):** manomatika/matika#31 ("feat: ahimsa release job — create GitHub release with DMG and EXE artifacts") was CLOSED manually 2026-06-03. It tracked implementing the ahimsa release job; that approach is superseded by §1 step 6 (retire ahimsa's release responsibility) and the mm product release (§0). No further action needed; recorded for the audit trail.
+
+17. **ahimsa#38 scope split (2026-06-14):** ahimsa#38 has two portions. **(a) Recipe-URL-casing sub-scope** — updating recipe.json URLs from `manomatika/Matika` → `manomatika/matika` inside ahimsa — is SUPERSEDED: the recipe leaves ahimsa for mm (§1 step 4), so there is no recipe.json in ahimsa to update. **(b) Non-recipe slug-ref scope** — slug refs in ahimsa `build.yml`, `CLAUDE.md`, `README`, local remotes — is FOLDED INTO §1 step 4. ahimsa#38 closes when both portions resolve.
+
+18. **POST-v0.0.1 ARCHITECTURAL DECISION (2026-06-14): mm release-assembly workflow.** mm will own a workflow that pulls ahimsa's built CI artifacts and publishes them to the mm product release, automating the manual artifact carry described in §1 step 11. Division of labor becomes **ahimsa BUILDS, mm ASSEMBLES + PUBLISHES** as code, not a manual step. A new issue to be filed in mm. Not in v0.0.1 scope; see Backlog in §1.
 
 ---
 
