@@ -52,5 +52,8 @@ ManoMatika product release is the blessed, distributable thing.
 - `manomatika-v0.0.1-plan.md` — the authoritative living release plan.
 - `shell_scripts/` — developer helper scripts (e.g. `sync-repos.sh`).
 
-(Recipes, audit log, product manifest, and `ARCHITECTURE.md` land here as the
-v0.0.1 release sequence proceeds.)
+- `recipes/` — product recipes (one directory per application)
+- `manifests/` — per-product-version BOM (component tag + resolved SHA)
+- `release-log.yaml` — human-edited source for the audit log
+- `RELEASES.md` — generated ecosystem-wide release log (do not hand-edit)
+- `ARCHITECTURE.md` — umbrella architecture doc for the full ecosystem
