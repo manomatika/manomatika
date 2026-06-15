@@ -1,5 +1,5 @@
 # ManoMatika v0.0.1 — Execution Plan
-**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`); 2026-06-14 (preconditions resolved, phase model added, #1–#3 marked complete); 2026-06-14 (task #4 cc-owned closures: issue/PR closures + branch deletion moved from Phase-2 manual cleanup to cc Phase-1/Lane-A — see §4 item 19)  
+**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`); 2026-06-14 (preconditions resolved, phase model added, #1–#3 marked complete); 2026-06-14 (task #4 cc-owned closures moved to Phase-1/Lane-A — see §4 item 19); 2026-06-14 (Lane-A tasks #4–#7 ahimsa-piece marked complete; mm#4, ahimsa#55/#56/#57/#58 merged; Phase 1 + Phase 2 complete)  
 **Composition (the blessed triple):** matika v0.0.4 + eyerate v0.0.4 + ahimsa v0.0.1  
 **Planner:** Claude Code, read-only investigation
 
@@ -30,10 +30,10 @@ This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes th
 1. **Settle the CLAUDE.md staleness guardrail.** Rule: CLAUDE.md never knowingly contains stale info; every factual claim is verified against actual repo state on each edit/regeneration; when unverifiable, omit. **[COMPLETE — executed in parallel.]**
 2. **Delete the local `matika v0.0.4-dev.*` tags** (hygiene). **[COMPLETE]** — Remote dev tags removed; matika carries v0.0.1/v0.0.2/v0.0.3 only (verified 2026-06-14 against live GitHub).
 3. **Stand up `manomatika/manomatika` (mm).** **[COMPLETE]** — README, CLAUDE.md, `manifests/` directory, and `shell_scripts/` committed to mm (verified 2026-06-14). Add mm issues to **Project #1** via `addProjectV2ItemById` as they are filed.
-4. **Relocate the reference-app recipe into mm.** Author recipe fresh in mm with canonical lowercase `manomatika/*` slugs, pinning matika v0.0.4 + eyerate v0.0.4. Repoint ahimsa `build.yml` to **fetch the recipe from mm**. **Fold in ahimsa#38 non-recipe scope**: update lowercase slug refs in ahimsa `build.yml`, `CLAUDE.md`, `README`, and local remotes. **cc-owned closures (Phase-1/Lane-A — not Phase-2 manual cleanup; see §4 item 19):** close **manomatika/ahimsa#35** and **manomatika/ahimsa#30** as superseded **[cc MUTATION]**; delete branch `fix/30-org-migration` (local + origin) **[cc MUTATION]**; close **manomatika/ahimsa#38** **[cc MUTATION]** once both its halves resolve — its recipe-URL sub-scope is superseded (recipe leaves ahimsa), its non-recipe slug scope is done within this task. [Precondition confirmed 2026-06-14: `fix/30-org-migration` SAFE to delete — one commit, 2-file org URL migration only, fully superseded by authoring fresh in mm; see §4 item 15.]
-5. **Move the audit log to mm.** Relocate `release-log.yaml` + `RELEASES.md` into mm. **Retarget ahimsa's rendering engine** — the live cross-repo query (**ahimsa#49**) and the `refresh-releases-md` job — to render mm's log from mm-hosted data. (The mechanism stays in ahimsa; the content lives in mm.)
-6. **Retire ahimsa's release responsibility.** Remove the release job and the self-`v*`-tag build trigger. ahimsa builds artifacts **on demand only** (`workflow_dispatch`), and **never** creates GitHub releases. (manomatika/matika#31 tracked this; CLOSED 2026-06-03; approach superseded — see §4 item 16.)
-7. **Docs refactor.** Author the umbrella **`ARCHITECTURE.md` in mm** (ahimsa-engine + matika + applug, linking down to component docs). Narrow ahimsa docs + CLAUDE.md to the engine (**ahimsa#32**) — the ahimsa-CLAUDE.md piece waits on #4–#6 so it describes the **final** CI shape. Verify/finalize matika and eyerate docs **before** they are tagged (**matika#47**, **eyerate#26**). [Phase 1 docs sub-lane — runs in parallel with machinery sub-lane #4→#6→#5; see Execution phases.]
+4. **Relocate the reference-app recipe into mm.** **[COMPLETE]** — mm#4 authored the recipe in mm with canonical lowercase `manomatika/*` slugs; ahimsa#55 retargeted `build.yml` to fetch the recipe from mm and removed the local recipe copy. cc-owned closures executed: manomatika/ahimsa#35 and manomatika/ahimsa#30 closed as superseded; branch `fix/30-org-migration` deleted (local + origin); manomatika/ahimsa#38 closed (both halves resolved — see §4 items 15, 17, 19).
+5. **Move the audit log to mm.** **[COMPLETE]** — ahimsa#57 relocated `release-log.yaml` + `RELEASES.md` to mm; wired `GitHubResolver` for live tag queries; retargeted the `refresh-releases-md` job to open PRs against mm. manomatika/ahimsa#49 closed. (Mechanism stays in ahimsa; content lives in mm.)
+6. **Retire ahimsa's release responsibility.** **[COMPLETE]** — ahimsa#56 removed the release job and `push: tags: v*` trigger from `build.yml`. ahimsa builds artifacts on demand only (`workflow_dispatch`) and never creates GitHub releases. (manomatika/matika#31 tracked this; CLOSED 2026-06-03; approach superseded — see §4 item 16.)
+7. **Docs refactor.** Umbrella `ARCHITECTURE.md` in mm: **[COMPLETE]** (mm#6). Narrowing ahimsa docs/CLAUDE.md to engine scope: **[COMPLETE]** — manomatika/ahimsa#32 closed by ahimsa#58. Stale divergence text removed from ahimsa README + CLAUDE.md and matika/eyerate CLAUDE.md (Lane-A docs pass, 2026-06-14 — see open PRs in each repo). Full docs verification before tagging remains open: **matika#47**, **eyerate#26**. [Phase 1 docs sub-lane — runs in parallel with machinery sub-lane #4→#6→#5; see Execution phases.]
 8. **Tag matika v0.0.4 + eyerate v0.0.4** (prereleases, notes-only). The recipe pins from step 4 now resolve.
 9. **Dispatch ahimsa `build.yml`** via `workflow_dispatch` off finalized `main` → installer **artifacts, no release**. **Presupposes** ahimsa `main` already contains the full build infra (PyInstaller, dmgbuild, Inno Setup — verified 2026-06-14 against live ahimsa main); step 9 exercises it, does not create it.
 10. **QA the macOS x86_64 DMG artifact on Intel hardware** — TC-B suite, smoke-test grade. **arm64 and Windows are out of scope this pass.**
@@ -53,8 +53,8 @@ This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes th
 
 | Phase | Owner | Tasks | Mode |
 |---|---|---|---|
-| **1 — Lane A** | cc + subagents | Machinery sub-lane (SERIAL): #4 → #6 → #5. Docs sub-lane (parallel with machinery): #7, with the ahimsa-CLAUDE.md piece joining after #4–#6 complete. cc also executes the #4 cc-owned closures: close manomatika/ahimsa#35 + manomatika/ahimsa#30 as superseded, delete `fix/30-org-migration` (local + origin), and close manomatika/ahimsa#38 once both its halves resolve (see §4 item 19). cc opens PRs, never merges. | [AGENT PR] |
-| **2 — Merge & close** | Pat | Review/merge Lane A PRs in dependency order. Manually close only the cross-repo `Closes manomatika/<repo>#N` refs that don't auto-fire on merge. Local cleanup (sync, prune, confirm clean). manomatika/ahimsa#35/#30/#38 and `fix/30-org-migration` are NOT here — done by cc in Phase 1 (see §4 item 19). **Gate before Phase 3.** | [HUMAN] |
+| **1 — Lane A** | cc + subagents | Machinery sub-lane (SERIAL): #4 → #6 → #5. Docs sub-lane (parallel with machinery): #7, with the ahimsa-CLAUDE.md piece joining after #4–#6 complete. cc also executes the #4 cc-owned closures: close manomatika/ahimsa#35 + manomatika/ahimsa#30 as superseded, delete `fix/30-org-migration` (local + origin), and close manomatika/ahimsa#38 once both its halves resolve (see §4 item 19). cc opens PRs, never merges. **COMPLETE 2026-06-14** — mm#4, ahimsa#55/#56/#57/#58 merged; cc-owned closures executed; task #7 docs pass completed. | [COMPLETE] |
+| **2 — Merge & close** | Pat | Review/merge Lane A PRs in dependency order. Manually close only the cross-repo `Closes manomatika/<repo>#N` refs that don't auto-fire on merge. Local cleanup (sync, prune, confirm clean). manomatika/ahimsa#35/#30/#38 and `fix/30-org-migration` are NOT here — done by cc in Phase 1 (see §4 item 19). **Gate before Phase 3.** **COMPLETE 2026-06-14.** | [COMPLETE] |
 | **3 — Pre-staging** | cc | Draft mm v0.0.1 release notes + author mm product manifest skeleton. Readies §1 step 11 inputs; does not shorten Lane B. | [AGENT PR] |
 | **4 — Lane B** | Pat + cc | Hard serial chain: #8 → #9 → #10 → #11 → #12 → #13. Step #10 manual on hardware; gated by Pat throughout. | [HUMAN]-gated |
 
@@ -72,10 +72,10 @@ This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes th
 | eyerate | Cleanup & Tooling (v0.0.4) | 2026-06-02 | 0 / 4 | Done |
 | eyerate | Deployment & Install (v0.0.4) | 2026-06-15 | 1 / 4 | In Progress (1 open = HUMAN QA macOS #17; Windows #18 Deferred → ahimsa#46) |
 | eyerate | Documentation & Release Readiness (v0.0.4) | 2026-06-30 | 1 / 1 | Todo |
-| ahimsa | Cleanup & Tooling (v0.0.1) | 2026-06-02 | 1 / 4 | In Progress (ahimsa#30 now superseded — recipe relocates to mm; see §1 step 4) |
-| ahimsa | Deployment & Install (v0.0.1) | 2026-06-15 | 3 / 12 | In Progress (3 open = HUMAN QA macOS #15/#16 + #49 engine-retarget; Windows #19 Deferred → ahimsa#46) |
+| ahimsa | Cleanup & Tooling (v0.0.1) | 2026-06-02 | 0 / 4 | Done (ahimsa#30 closed as superseded — recipe relocated to mm; see §1 step 4) |
+| ahimsa | Deployment & Install (v0.0.1) | 2026-06-15 | 2 / 12 | In Progress (2 open = HUMAN QA macOS #15/#16; ahimsa#49 closed by PR #57; Windows #19 Deferred → ahimsa#46) |
 | ahimsa | QA & System Test (v0.0.1) | 2026-06-28 | 0 / 1 | Done — test plan merged via PR #45 (#33 closed); the macOS x86_64 QA matrix is now executed against the mm QA gate (§0) |
-| ahimsa | Documentation & Release Readiness (v0.0.1) | 2026-06-30 | 2 / 2 | Todo |
+| ahimsa | Documentation & Release Readiness (v0.0.1) | 2026-06-30 | 0 / 2 | Done (ahimsa#38 closed as superseded; ahimsa#32 closed by PR #58) |
 
 ### Out-of-Scope Milestones (confirmed null due_on — not in v0.0.1 cycle)
 - eyerate: `Planning (v0.0.5)` — eyerate#20 (sync_version investigation, "not blocking v0.0.4"); eyerate#35 (integration-test conftest sibling-path hardening) + eyerate#36 (PR-triggered Python test gate) — both filed 2026-06-04, manomatika v0.0.2 cycle, **NOT in v0.0.1 scope**.
@@ -180,7 +180,7 @@ All Project statuses confirmed via GraphQL against Project #1 (ManoMatika Roadma
 | manomatika/ahimsa#19 | Test EXE install on clean Windows 11 | Deferred — no Windows hardware; closed-as-deferred → manomatika/ahimsa#46 |
 | manomatika/ahimsa#26 | release notes: document unsigned-installer limitation | Done — auto-closed by PR #44 (the unsigned-installer prose now lives in notes content; the product release that carries it is mm's, §0) |
 | manomatika/ahimsa#48 | Release-notes generation system: file-based per-repo notes + umbrella | Done — closed by PR #50. **Note:** the audit-log *content* this built in ahimsa **relocates to mm** (§1 step 5); ahimsa keeps the rendering engine only |
-| manomatika/ahimsa#49 | Wire live cross-repo release query against canonicalized refs (completes stubbed regenerator) | Open — **retargeted** to render **mm's** log from mm-hosted data (§1 step 5) |
+| manomatika/ahimsa#49 | Wire live cross-repo release query against canonicalized refs (completes stubbed regenerator) | **Done** — closed by ahimsa PR #57 (audit log moved to mm; `GitHubResolver` wired for live tag queries; `refresh-releases-md` job retargeted to mm) |
 
 > **Overlap with matika D&I tracking issues:** matika#26 ⊇ ahimsa#9+#10; matika#29 = ahimsa#13+#14; matika#30 = ahimsa#17+#18. Same physical engine work tracked in both repos; ahimsa PRs reference but do not auto-close the matika issues (manual close required).
 
@@ -195,7 +195,7 @@ All Project statuses confirmed via GraphQL against Project #1 (ManoMatika Roadma
 | Issue | Title | Status |
 |---|---|---|
 | manomatika/ahimsa#38 | Canonicalize GitHub repo slugs to lowercase (Matika → matika, EyeRate → eyerate) | **#38-early DONE** (matika#59, eyerate#33, ahimsa#51 — non-recipe slug refs lowercased). The recipe portion is **superseded in ahimsa**: the recipe is authored fresh in **mm** with canonical lowercase slugs (§1 step 4), so there is no remaining ahimsa recipe.json edit |
-| manomatika/ahimsa#32 | docs: verify and update all documentation for release | Todo — **narrow ahimsa docs/CLAUDE.md to the engine** (§1 step 7) |
+| manomatika/ahimsa#32 | docs: verify and update all documentation for release | **Done** — closed by ahimsa PR #58 (CLAUDE.md narrowed to engine-only scope; migration status resolved block added) |
 
 ---
 
