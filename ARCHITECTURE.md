@@ -114,8 +114,10 @@ this repo.
 
 ### Invariants
 
-- **Exact pins only.** Every version field is `X.Y.Z` — no ranges, wildcards,
-  pre-release suffixes, or `_dev` markers.
+- **Exact pins only.** Every version field is the bare core `X.Y.Z` — no
+  ranges, wildcards, or pre-release suffixes (`-dev`, `-rc.N`). Pre-release
+  suffixes belong only on human/audit surfaces (the `VERSION` string, git tags,
+  GitHub release titles/bodies, and the audit log), never inside recipe pins.
 - **AppLug–matika agreement.** Every `applugs[].matika_version` must equal
   `matika.version`. AppLugs must declare the same framework version they were
   built against.
@@ -206,7 +208,25 @@ prevent silent drift if a tag is ever moved.
 
 ---
 
-## 7. Audit Log
+## 7. Versioning — Core / Suffix Contract
+
+`VERSION` (this repo root) is the single source of truth for this repo's version
+metadata. It reads a SemVer string of the form `X.Y.Z` or `X.Y.Z-<suffix>` with
+no leading `v` (today: `0.0.1-dev`).
+
+- **Version core (`X.Y.Z`)** is the canonical identity used for comparison,
+  artifact naming, and OS/installer fields. Recipe pins (`recipe.json`
+  `version` / `matika_version`, manifest tags) carry the **bare core** only.
+- **Pre-release suffix** (`-dev`, `-rc.N`) lives ONLY on human/audit surfaces:
+  the `VERSION` string, git tags, GitHub release titles/bodies, and the audit
+  log. It never appears inside a recipe pin or BOM SHA mapping.
+- **Ladder:** `X.Y.Z-dev` < `X.Y.Z-rc.N` < `X.Y.Z` (final). The suffix is
+  delimited with a hyphen (`-dev`), which is valid SemVer; the underscore form
+  (`_dev`) is invalid and is not used anywhere in the ecosystem.
+
+---
+
+## 8. Audit Log
 
 `release-log.yaml` (this repo) is the human-edited source of truth for the
 ecosystem-wide release audit log. `RELEASES.md` is the generated output — do
@@ -236,7 +256,7 @@ an actual tag.
 
 ---
 
-## 8. Component Documentation Links
+## 9. Component Documentation Links
 
 | Document | Location |
 |---|---|
