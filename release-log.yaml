@@ -159,6 +159,7 @@ entries:
     tag: v0.0.1
     date: "(pending)"
     status: "(pending — tag not yet pushed)"
+    pending: true
     artifact: "none (pending)"
     prs: "(pending)"
     summary: "Placeholder entry for ahimsa v0.0.1. To be filled at release time."
