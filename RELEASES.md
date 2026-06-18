@@ -6,6 +6,20 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.2
+
+- **Date:** 2026-06-18
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#70
+- **Summary:** Second release candidate for matika v0.0.4 — ships platform-native app icons
+  (.icns for macOS, .ico for Windows) generated from the new 512×512 square PNG
+  source (matika_icon_512.png). Fixes the PyInstaller 6.21 freeze caused by
+  using a PNG as the app icon without Pillow. matika.spec now selects the native
+  icon per platform at spec-parse time via sys.platform; Pillow is not added to
+  any requirements file. This is a notes-only GitHub prerelease for QA
+  validation — not a blessed product release.
+
 ## matika v0.0.4-rc.1
 
 - **Date:** 2026-06-17
