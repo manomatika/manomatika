@@ -91,6 +91,7 @@ this repo.
 {
   "application": {
     "name": "Matika Reference Application",
+    "product_name": "ManoMatika",
     "version": "0.0.1",
     "bundle_id": "com.manomatika.matika-reference-app",
     "icon": "assets/icon.icns"
@@ -125,6 +126,14 @@ this repo.
   identical across the applug list.
 - **Repo format.** `host/owner/repo` — no URL scheme, no `.git`, no SSH form.
   Default allowed host: `github.com`.
+- **Product identity.** `application.product_name` is the canonical PRODUCT
+  brand (`ManoMatika`). ahimsa's build derives every user-facing name from it:
+  the lowercase slug names the artifact FILE
+  (`manomatika-<version>-<os>-<arch>.dmg/.exe`) and the proper-noun name is the
+  installed bundle/exe identity (`ManoMatika-<version>.app`/`.exe`). The version
+  embedded is the PRODUCT version (`application.version`), not matika's framework
+  version. `application.name` is a separate descriptive title and drives no
+  artifact name.
 
 ahimsa's validator verifies all rules in a single pass and additionally fetches
 each AppLug's `applug.json` from GitHub at the declared tag to confirm `id`,

@@ -1,6 +1,7 @@
 {
   "application": {
     "name": "Matika Reference Application",
+    "product_name": "ManoMatika",
     "version": "0.0.1",
     "bundle_id": "com.manomatika.matika-reference-app",
     "icon": "assets/icon.icns"
