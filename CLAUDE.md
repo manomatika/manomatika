@@ -41,10 +41,18 @@ CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
 - `ManoMatika` (camel case) ONLY when naming the project/product as a proper
   noun in prose. `manomatika` (lowercase) when referencing the repo.
 - `applug` is always rendered lowercase.
-- The product's installed identity stays capitalized as a proper noun
-  (`Matika.app`, `Matika-<ver>.exe`, FastAPI `title="Matika"`); lowercase still
+- The product's installed identity is the PRODUCT name `ManoMatika`, driven by
+  the recipe's `application.product_name` field (see `ARCHITECTURE.md` §3). It is
+  capitalized as a proper noun for the installed bundle/exe and shortcuts
+  (`ManoMatika-<product-core>.app`, `ManoMatika-<product-core>.exe`), where
+  `<product-core>` is the bare-core PRODUCT version (`application.version`, e.g.
+  `0.0.1`) — NOT matika's framework version. The DMG/EXE **filename** uses the
+  lowercase product slug (`manomatika-<product-core>-<os>-<arch>.dmg/.exe`),
+  consistent with the lowercase artifact-filename convention. Lowercase still
   applies to repo slugs, URLs, internal/runtime data dirs (e.g. `~/matika/`),
-  and config refs.
+  and config refs. (The matika framework's own runtime FastAPI `title="Matika"`
+  is the component's API title, not the installed product identity, and is left
+  unchanged by this contract.)
 
 ## Cross-repo references
 
