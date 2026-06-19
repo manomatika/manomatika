@@ -6,6 +6,23 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.3
+
+- **Date:** 2026-06-19
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#77
+- **Summary:** Third release candidate for matika v0.0.4 — fixes the product-identity
+  regression introduced by v0.0.4-rc.2: the spec changes that read
+  MATIKA_PRODUCT_NAME/MATIKA_PRODUCT_VERSION from the build env were merged to
+  matika main after the rc.2 tag was cut, so CI builds cloning at rc.2 produced
+  Matika-0.0.4 instead of ManoMatika-0.0.1. Adds a CI fail-loud guard in
+  matika.spec: if CI=true and MATIKA_PRODUCT_NAME is unset the spec exits
+  immediately with a clear error instead of silently mis-naming the bundle.
+  Paired with manomatika/manomatika#16 (recipe pinned to v0.0.4-rc.3) and
+  manomatika/ahimsa#72 (PyInstaller assertion step + manomatika_ref cross-repo
+  validation input). Notes-only GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.2
 
 - **Date:** 2026-06-18
