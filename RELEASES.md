@@ -12,24 +12,23 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 - **Status:** published
 - **Artifact:** none (notes-only GitHub prerelease)
 - **PRs:** manomatika/matika#80
-- **Summary:** Sixth release candidate for matika v0.0.4 — cumulative, cut from
-  main after manomatika/matika#80, so it carries every prior rc.5 fix (Bug B
-  applug-deps bundling via `collect_all("yfinance"/"curl_cffi")`, direct-file
-  validate guard) PLUS the test-suite-100 runtime cleanups. Three root-cause
-  changes: (1) JWT `create_access_token` now uses timezone-aware
-  `datetime.now(timezone.utc)` instead of the deprecated naive
-  `datetime.utcnow()` (Python 3.12+ deprecation removed at source); (2) authlib
-  bumped 1.7.0 → 1.7.2 in pyproject and requirements; (3) the test db fixture
-  joins the session into the external transaction via a SAVEPOINT restarted
-  after each commit/rollback, removing the SAWarning("transaction already
-  deassociated") at root. The full matika suite is now 100% clean under
-  `-W error` (435 passed, 0 failed / 0 skipped / 0 xfail / 0 deselected / 0
-  warnings). No runtime behavior change beyond the timezone-aware tokens and the
-  authlib patch bump. Paired with manomatika/eyerate v0.0.4-rc.2 (unchanged) and
-  manomatika/ahimsa main (integration tier now runs in the full suite). Recipe
-  re-pinned to v0.0.4-rc.6 + v0.0.4-rc.2. Frozen build smoke-validated green on
-  arm, intel, and windows with data_deps_ok True. Notes-only GitHub prerelease
-  for QA.
+- **Summary:** Sixth release candidate for matika v0.0.4 — cumulative, cut from main after
+  manomatika/matika#80, so it carries every prior rc.5 fix (Bug B applug-deps
+  bundling via collect_all("yfinance"/"curl_cffi"), direct-file validate guard)
+  PLUS the test-suite-100 runtime cleanups. Three root-cause changes: (1) JWT
+  create_access_token now uses timezone-aware datetime.now(timezone.utc) instead
+  of the deprecated naive datetime.utcnow() (Python 3.12+ deprecation removed at
+  source); (2) authlib bumped 1.7.0 -> 1.7.2 in pyproject and requirements; (3)
+  the test db fixture joins the session into the external transaction via a
+  SAVEPOINT restarted after each commit/rollback, removing the
+  SAWarning("transaction already deassociated") at root. The full matika suite
+  is now 100% clean under -W error (435 passed, 0 failed / 0 skipped / 0 xfail /
+  0 deselected / 0 warnings). No runtime behavior change beyond the timezone-
+  aware tokens and the authlib patch bump. Paired with manomatika/eyerate
+  v0.0.4-rc.2 (unchanged) and manomatika/ahimsa main (integration tier now runs
+  in the full suite). Recipe re-pinned to v0.0.4-rc.6 + v0.0.4-rc.2. Frozen
+  build smoke-validated green on arm, intel, and windows with data_deps_ok True.
+  Notes-only GitHub prerelease for QA.
 
 ## eyerate v0.0.4-rc.2
 
