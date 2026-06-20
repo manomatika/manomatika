@@ -43,6 +43,15 @@ matika and eyerate are components that ship as notes-only prereleases.
 - **The full suite runs in each repo's correct environment** (the uv-managed
   `.venv`) so a green run is never an env artifact. A change is not done until
   every affected suite is 100% clean.
+- **Escaped-bug regression mandate (standing rule 22).** Any bug that reaches
+  CI, an rc, or install/runtime testing without being caught by the suite MUST,
+  as part of its fix, gain a regression test that would have caught it — added
+  at the layer where it escaped (unit/integration for logic gaps; a feature/E2E
+  check against the **frozen, pinned artifact** for product-behavior gaps). The
+  fix is not done until that test exists, fails without the fix, and passes with
+  it. Product-behavior regressions must be exercised against the frozen artifact
+  on BOTH install paths (fresh install AND upgrade over a prior install), since
+  the upgrade path is where the stale-plugin regression escaped.
 
 ## Documentation integrity (non-negotiable)
 

@@ -6,6 +6,36 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.7
+
+- **Date:** 2026-06-20
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#81
+- **Summary:** Seventh release candidate for matika v0.0.4 — cumulative, cut from main after
+  manomatika/matika#81, so it carries every prior rc.6 fix PLUS the launcher
+  stale-plugin-refresh fix. Root cause of the user-reported "EyeRate admin shows
+  coming soon / securities lookup dead after a reinstall": the frozen app
+  bundles the CORRECT eyerate (rc.2, admin form + ProviderError), but
+  launcher.py::_extract_bundled_plugins (a) only ran inside first_run_init —
+  gated by the ~/matika/.initialized sentinel, so it never ran on an upgrade —
+  and (b) skipped any plugin dir that already existed. On an install over a
+  prior version the new bundled plugin code was never extracted, so the stale
+  "coming soon" eyerate template left in ~/matika/plugins/eyerate/ from an
+  earlier install survived every reinstall (the runtime data dir is not removed
+  with the .app). Fix: plugin install/refresh now runs on EVERY launch and is
+  version/content-fingerprint-gated — it refreshes plugin CODE when the bundled
+  version or code differs from what is installed, while PRESERVING user/runtime
+  DATA (manifest-gated overwrite + stale-code removal); per-plugin
+  install/refresh/skip decisions are logged. Regression tests cover fresh /
+  upgrade-refresh / same-version-skip / fingerprint-refresh / stale-removal /
+  data-preservation (standing rule 22). Full matika suite 100% clean (439
+  passed, 0 failed / 0 skipped / 0 xfail / 0 deselected / 0 warnings). Paired
+  with manomatika/eyerate v0.0.4-rc.2 (unchanged) and the ahimsa frozen feature-
+  verification harness (manomatika/ahimsa#77) that proves admin form + VOO
+  lookup + stale-plugin refresh on BOTH fresh and upgrade-over-stale paths.
+  Notes-only GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.6
 
 - **Date:** 2026-06-20
