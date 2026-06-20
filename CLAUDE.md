@@ -24,6 +24,10 @@ ahimsa is pure *mechanism* (the recipe engine): it builds and validates
 artifacts on demand but owns no recipe content and hosts no product releases.
 matika and eyerate are components that ship as notes-only prereleases.
 
+## Test discipline (non-negotiable)
+
+- **Full-suite, every change, everywhere.** ANY code change — regardless of which repo it lives in — requires the COMPLETE unit-test suite of every affected repo (and any repo whose behavior could be impacted) to be run and pass: 0 failed / 0 skipped / 0 xfail. Run the entire suite, not a subset, before opening any PR; a change is not done until all suites are green. Use each repo's correct test environment so a green suite is never masked by an env artifact.
+
 ## Documentation integrity (non-negotiable)
 
 CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
