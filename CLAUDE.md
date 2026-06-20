@@ -26,7 +26,23 @@ matika and eyerate are components that ship as notes-only prereleases.
 
 ## Test discipline (non-negotiable)
 
-- **Full-suite, every change, everywhere.** ANY code change — regardless of which repo it lives in — requires the COMPLETE unit-test suite of every affected repo (and any repo whose behavior could be impacted) to be run and pass: 0 failed / 0 skipped / 0 xfail. Run the entire suite, not a subset, before opening any PR; a change is not done until all suites are green. Use each repo's correct test environment so a green suite is never masked by an env artifact.
+- **Full-suite, every change, everywhere — 100% clean (standing rule 21).** ANY
+  code change, in ANY repo, requires the COMPLETE unit-test suite of every
+  affected repo (and any repo whose behavior could be impacted) to RUN IN FULL —
+  nothing excluded, deselected, skipped, or marked integration-only — and pass
+  100%: **0 failed / 0 skipped / 0 xfail / 0 deselected / 0 warnings**. No test
+  may be excluded or filtered and no warning suppressed without the product
+  owner's explicit, per-case approval recorded as a documented rule variation.
+- **Eliminate warnings at the root.** A warning is a defect, not noise: fix the
+  emitting code or bump the offending dependency (e.g. timezone-aware
+  `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow()`; a
+  patch-bump of a dependency that emits a self-deprecation). Never silence a
+  warning with a `filterwarnings` entry, a `-W ignore`, or a `-m 'not …'`
+  deselection — those are suppression, and suppression requires the same
+  explicit per-case owner approval as excluding a test.
+- **The full suite runs in each repo's correct environment** (the uv-managed
+  `.venv`) so a green run is never an env artifact. A change is not done until
+  every affected suite is 100% clean.
 
 ## Documentation integrity (non-negotiable)
 
