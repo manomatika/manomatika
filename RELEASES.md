@@ -6,6 +6,45 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## eyerate v0.0.4-rc.2
+
+- **Date:** 2026-06-20
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/eyerate#45
+- **Summary:** Second release candidate for eyerate v0.0.4. Bug A fix: replace the
+  eyerate_admin.html stub ("Administration features coming soon.") with a
+  working provider-selection form (radio buttons for yahoo/finnhub/
+  alphavantage, API key field, Save/persist via POST). Task 4: add ProviderError
+  exception class so all three data providers (Yahoo, Finnhub, AlphaVantage)
+  raise on HTTP errors, rate limits, missing API keys, and dep-import failures
+  instead of swallowing exceptions and returning empty results. Routes return
+  HTTP 502 with "lookup failed: <reason>" so the UI distinguishes provider
+  failure from genuine zero results. Lookup dialog JS checks resp.ok and shows
+  an error message instead of silently showing empty rows. Dep-check at load
+  time logs "Data provider deps OK (yfinance, curl_cffi)" for the ahimsa smoke
+  gate. 13 new regression tests. Paired with manomatika/matika v0.0.4-rc.5 and
+  manomatika/ahimsa#75 (applug deps install before freeze + data_deps_ok smoke
+  gate). Notes-only GitHub prerelease for QA.
+
+## matika v0.0.4-rc.5
+
+- **Date:** 2026-06-20
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#79
+- **Summary:** Fifth release candidate for matika v0.0.4. Adds collect_all("yfinance") and
+  collect_all("curl_cffi") to matika.spec so the eyerate data-provider libraries
+  are bundled in the frozen artifact. Previously these were lazy imports
+  invisible to PyInstaller's static analysis, causing Bug B: symbol
+  lookup/search silently returned empty results in the frozen app. Also adds a
+  sys.path guard to validate_recipe.py so it can be run as a direct file without
+  pip installation (fixes test_invocation_direct_file). Paired with
+  manomatika/eyerate v0.0.4-rc.2 and manomatika/ahimsa#75 (applug deps install
+  before freeze + data_deps_ok smoke gate). Smoke-validated green on all three
+  platforms (arm, intel, windows) with data_deps_ok gate passing. Notes-only
+  GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.4
 
 - **Date:** 2026-06-19
