@@ -8,7 +8,7 @@
   },
   "matika": {
     "version": "0.0.4",
-    "tag": "main",
+    "tag": "v0.0.4-rc.5",
     "repo": "github.com/manomatika/matika"
   },
   "applugs": [
@@ -17,7 +17,7 @@
       "repo": "github.com/manomatika/eyerate",
       "version": "0.0.4",
       "matika_version": "0.0.4",
-      "tag": "main"
+      "tag": "v0.0.4-rc.2"
     }
   ]
 }
