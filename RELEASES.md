@@ -6,6 +6,30 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.4
+
+- **Date:** 2026-06-19
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#78
+- **Summary:** Fourth release candidate for matika v0.0.4 — fixes the third boot failure: the
+  frozen ManoMatika-0.0.1 bundle installed with the correct product identity
+  (the rc.3 fix) but died on first launch with "No module named 'alembic'" and
+  left NO log file. Two matika defects: (1) matika.spec listed only
+  alembic.command/alembic.config as hiddenimports, which does not collect the
+  rest of the alembic package and its dynamically-loaded migration runtime — now
+  uses PyInstaller collect_all("alembic") + collect_all( "sqlalchemy") and pins
+  the in-process migration script_location to the bundled sys._MEIPASS
+  migrations dir; (2) an early/import-time failure left no log — launcher.py now
+  brings logging up first, installs a last-resort excepthook, and wraps the
+  whole startup so a full traceback always reaches ~/matika/logs. The deeper
+  root cause (the build never pip-installing matika's runtime deps before
+  PyInstaller, so nothing was bundled) is fixed in manomatika/ahimsa#73, which
+  also adds a CI smoke-launch step that boots the frozen artifact on all three
+  platforms — the durable guardrail that makes an unbootable build fail in CI.
+  Paired with manomatika/manomatika#17 (recipe pinned to v0.0.4-rc.4). Notes-
+  only GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.3
 
 - **Date:** 2026-06-19
