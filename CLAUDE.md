@@ -20,6 +20,14 @@ This repo owns:
 - the cross-component umbrella **docs** (`ARCHITECTURE.md` and below);
 - the **QA gate** a product version must pass before release.
 
+**TARGET-vs-CURRENT (manifest/BOM):** the per-version manifest is still a TARGET.
+Today `manifests/` holds only `TEMPLATE.yaml` (the schema: `components[]` of
+`{repo, tag, sha}` + `installer{filename, platform, sha256}` + `qa{suite, result,
+reference}`). No concrete `<version>.yaml` (e.g. `0.0.1.yaml`) exists yet — the
+first real BOM is authored when the first product version is cut. (Note the
+TEMPLATE's example installer filename predates the lowercase-slug convention in
+*Naming conventions* — the convention, not the stale example, is authoritative.)
+
 ahimsa is pure *mechanism* (the recipe engine): it builds and validates
 artifacts on demand but owns no recipe content and hosts no product releases.
 matika and eyerate are components that ship as notes-only prereleases.
@@ -79,9 +87,12 @@ CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
   lowercase product slug (`manomatika-<product-core>-<os>-<arch>.dmg/.exe`),
   consistent with the lowercase artifact-filename convention. Lowercase still
   applies to repo slugs, URLs, internal/runtime data dirs (e.g. `~/matika/`),
-  and config refs. (The matika framework's own runtime FastAPI `title="Matika"`
-  is the component's API title, not the installed product identity, and is left
-  unchanged by this contract.)
+  env vars (`MATIKA_*`), config refs, and the macOS `bundle_identifier`
+  (`com.manomatika.matika`). User-facing surfaces in the matika framework now
+  carry the product proper noun: the runtime FastAPI `title="ManoMatika"`
+  (`src/matika/main.py`) and the en/es locale brand strings (e.g.
+  `"ManoMatika - Yield Tracker"`) were flipped from `Matika` to `ManoMatika`.
+  The internal package/repo identity stays lowercase `matika`.
 
 ## Cross-repo references
 
@@ -110,3 +121,24 @@ Core / suffix contract (see `ARCHITECTURE.md` §7):
 - **Ladder:** `X.Y.Z-dev` < `X.Y.Z-rc.N` < `X.Y.Z` (final). The suffix is
   delimited with a hyphen (`-dev`, valid SemVer); the underscore form (`_dev`)
   is invalid and is used nowhere in the ecosystem.
+
+## QA gate (mechanized in ahimsa; component contracts it enforces)
+
+The product authority owns the QA *gate*; the verification *mechanism* lives in
+the components and is cross-referenced here (not duplicated). A candidate product
+version passes the gate when ahimsa's `build.yml` produces a green frozen build:
+
+- **ahimsa runs the gate in CI.** Each build job smoke-launches the frozen
+  artifact and runs **tier-a** authenticated-HTTP checks (`scripts/frozen_verify.py`)
+  and **tier-b** headless-Playwright checks (`scripts/browser_verify.py`) on BOTH
+  install paths — **fresh install AND upgrade-over-stale** — across
+  `macos-14` (arm64), `macos-15-intel`, and `windows-latest`. See
+  `manomatika/ahimsa`.
+- **matika's launcher contract it relies on.** The frozen app refreshes a bundled
+  plugin on **every launch** when the bundled version/fingerprint differs (per-plugin
+  `.matika_plugin_install.json` marker), preserving user/runtime data — the fix for
+  the stale-plugin regression that the upgrade path exists to catch. See
+  `manomatika/matika`.
+- **eyerate's provider contract it asserts.** A provider failure surfaces LOUDLY as
+  **HTTP 502** with a `detail` body — never a silent empty result; the gate forces a
+  keyless provider and asserts the visible error. See `manomatika/eyerate`.
