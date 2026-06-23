@@ -9,28 +9,24 @@ ecosystem. **ManoMatika is the product**: a QA-validated, pinned triple of
 component versions (matika + eyerate + ahimsa). This repo is NOT a component;
 it composes and releases components.
 
-This repo owns:
-
-- the **recipes** that compose a product from its components;
-- the **audit log** — `release-log.yaml` (human-edited source) and the generated
-  `RELEASES.md`;
-- the **product release** and the single hosted **installer binary**;
-- the per-product-version **manifest / BOM** (each component pinned by **tag AND
-  resolved commit SHA**);
-- the cross-component umbrella **docs** (`ARCHITECTURE.md` and below);
-- the **QA gate** a product version must pass before release.
+This repo owns: the **recipes** that compose a product from its components; the
+**audit log** (`release-log.yaml` human-edited source + generated `RELEASES.md`);
+the **product release** and single hosted **installer binary**; the per-product-version
+**manifest / BOM** (each component pinned by **tag AND resolved commit SHA**); the
+cross-component umbrella **docs** (`ARCHITECTURE.md` and below); and the **QA gate**
+a product version must pass before release.
 
 **TARGET-vs-CURRENT (manifest/BOM):** the per-version manifest is still a TARGET.
 Today `manifests/` holds only `TEMPLATE.yaml` (the schema: `components[]` of
 `{repo, tag, sha}` + `installer{filename, platform, sha256}` + `qa{suite, result,
-reference}`). No concrete `<version>.yaml` (e.g. `0.0.1.yaml`) exists yet — the
-first real BOM is authored when the first product version is cut. (Note the
-TEMPLATE's example installer filename predates the lowercase-slug convention in
-*Naming conventions* — the convention, not the stale example, is authoritative.)
+reference}`). No concrete `<version>.yaml` exists yet — the first real BOM is
+authored when the first product version is cut. (The TEMPLATE's example installer
+filename predates the lowercase-slug convention in *Naming conventions* — the
+convention, not the stale example, is authoritative.)
 
-ahimsa is pure *mechanism* (the recipe engine): it builds and validates
-artifacts on demand but owns no recipe content and hosts no product releases.
-matika and eyerate are components that ship as notes-only prereleases.
+ahimsa is pure *mechanism* (the recipe engine): it builds and validates artifacts
+on demand but owns no recipe content and hosts no product releases. matika and
+eyerate are components that ship as notes-only prereleases.
 
 ## Working Style & Discipline
 
@@ -38,7 +34,7 @@ This section captures the standing working rules across the manomatika ecosystem
 
 ### Documentation integrity
 
-CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information. Whenever CLAUDE.md is edited or regenerated, every factual claim about this repo must be verified against the actual current repo state before being written. Stale claims are defects. When a claim cannot be verified, omit it rather than guess. TARGET-vs-CURRENT divergence (where the intended model differs from what the code/repo physically contains today) must be stated honestly, not papered over.
+CLAUDE.md must never knowingly contain stale information. Whenever CLAUDE.md is edited or regenerated, every factual claim about this repo (workflow/job status, ownership boundaries, file locations, build/release state) must be verified against the actual current repo state before being written. Stale claims are defects. When a claim cannot be verified, omit it rather than guess. This integrity requirement applies to all docs in this repo, not just CLAUDE.md. TARGET-vs-CURRENT divergence (where the intended model differs from what the code/repo physically contains today) must be stated honestly, not papered over.
 
 ### Collaboration model
 
@@ -52,10 +48,10 @@ CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
 
 - **The user does all git review and merges in the browser.** Don't merge PRs, push to main, or tag releases unless explicitly instructed.
 - **Don't stage or commit unless explicitly granted.** The user handles `git add` / `git commit` manually by default. When granted, follow the conventional-commit pattern (`docs:`, `fix:`, `feat:`, `refactor:`, etc.) and include `Closes manomatika/<repo>#N` (fully qualified) where applicable.
-- **Cross-repo issue/PR references must always be fully qualified.** Write `manomatika/matika#N`, `manomatika/eyerate#N`, `manomatika/ahimsa#N` — never a bare `#N` for an issue that lives in a different repo. Bare refs have caused real damage: a misqualified `Closes #11` / `Closes #12` in matika PR #35 closed unrelated issues in another repo's tracker. Bare refs are only safe when the PR and the issue are in the same repo. Cross-repo `Closes` references only cross-link — they do NOT auto-close; close manually after merge.
+- **Cross-repo issue/PR references must always be fully qualified.** Write `manomatika/matika#N`, `manomatika/eyerate#N`, `manomatika/ahimsa#N` — never a bare `#N` for an issue that lives in a different repo. Bare refs are only safe when the PR and the issue are in the same repo. Cross-repo `Closes` references only cross-link — they do NOT auto-close; close manually after merge.
 - **cc does not run `git merge` locally.** Integration of branches is done by the user via PR merge in the browser. For any local branch updates cc performs, use `git rebase` or `git cherry-pick`. cc may run `rm -rf` ONLY within a repo working directory under `~/dev/projects/` (a clone `~/dev/projects/<repo>/` or a worktree `~/dev/projects/<repo>-<branch>/`) or under `~/dev/projects/cc_output/` — never anywhere else on the filesystem, and never with an unanchored or variable-expanded path that could resolve outside them. Targeted `git rm` for tracked files remains the norm; `rm -rf` is the constrained exception (rule 23).
 - **`VERSION` is the single source of truth** for version metadata in this repo. Never hand-edit version literals in other files; release tooling propagates from `VERSION`.
-- **The user uses git worktrees** for parallel work (e.g. `~/dev/projects/manomatika-45/` alongside `~/dev/projects/manomatika/` on a separate branch). At any moment, the user may be operating in any of several working directories for the same repo. Always check the current branch (`git branch --show-current`) and confirm it matches what you expect before assuming.
+- **The user uses git worktrees** for parallel work (e.g. `~/dev/projects/matika-45/` alongside `~/dev/projects/matika/` on a separate branch). At any moment, the user may be operating in any of several working directories for the same repo. Always check the current branch (`git branch --show-current`) and confirm it matches what you expect before assuming.
 - **Multi-instance/parallel discipline.** When operating as one of multiple parallel cc instances, stay strictly within the assigned worktree, branch, and scope of files described in the task. Do not modify files outside the assigned scope, even if issues are noticed elsewhere — surface those issues to the user as separate items to triage rather than fixing in-flight. Cross-cutting changes that touch another agent's work area must be coordinated by the user, not initiated unilaterally.
 
 ### Code and test discipline
@@ -93,7 +89,7 @@ CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
 ### Communication and output
 
 - **Put prompts and commands in code blocks** so the user can one-tap copy them.
-- The user is on **macOS / iTerm2** (tmux planned). Shell defaults to zsh.
+- The user is on **macOS** and uses **Ghostty** and **tmux** for terminal work (shell defaults to zsh). The user also runs a **Dell Latitude** (64 GB RAM, no high-performance GPU) for local models via **Ollama**, currently favoring **qwen**. All configs are managed with **chezmoi**; any change to any config must follow chezmoi best practice and standards. chezmoi usage is captured in a separate handoff file, `chezmoi-dotfiles-handoff.md`. The user edits in **neovim**, and may also use **VSC**.
 - The user is **expert in software architecture and engineering, novice in git/GitHub specifics.** When git or `gh` commands appear in plans or output, explain plainly what they do, what they touch, and what the user will see.
 
 ## Naming conventions (non-negotiable)
@@ -121,43 +117,8 @@ CLAUDE.md and all docs in this repo must NEVER knowingly hold stale information.
 
 ## Versioning
 
-`VERSION` (this repo root) is the single source of truth for this repo's version
-metadata. It reads a SemVer string of the form `X.Y.Z` or `X.Y.Z-<suffix>` with
-no leading `v` (today: `0.0.1-dev`). The product manifest pins each component by
-tag AND resolved commit SHA — no ranges, no wildcards.
+See [docs/versioning.md](docs/versioning.md) for the full versioning contract (VERSION as source of truth, core/suffix rules, recipe field constraints, and version ladder).
 
-Core / suffix contract (see `ARCHITECTURE.md` §7):
+## QA gate
 
-- **Version core (`X.Y.Z`)** is canonical for ALL comparison, artifact/bundle
-  naming, and OS/installer/Info.plist fields.
-- **Pre-release suffix** (`-dev`, `-rc.N`) lives ONLY on human/audit surfaces:
-  the `VERSION` string, git tags, GitHub release titles/bodies, and the audit
-  log. It never appears inside a recipe PIN field or BOM SHA mapping.
-- **Recipe fields.** PIN fields (`recipe.json` `version` / `matika_version` /
-  `applugs[].version`) stay bare core. The `tag` fields are git refs and MAY
-  carry a suffix. `matika_version` is the matika FRAMEWORK compatibility pin —
-  not a product version.
-- **Ladder:** `X.Y.Z-dev` < `X.Y.Z-rc.N` < `X.Y.Z` (final). The suffix is
-  delimited with a hyphen (`-dev`, valid SemVer); the underscore form (`_dev`)
-  is invalid and is used nowhere in the ecosystem.
-
-## QA gate (mechanized in ahimsa; component contracts it enforces)
-
-The product authority owns the QA *gate*; the verification *mechanism* lives in
-the components and is cross-referenced here (not duplicated). A candidate product
-version passes the gate when ahimsa's `build.yml` produces a green frozen build:
-
-- **ahimsa runs the gate in CI.** Each build job smoke-launches the frozen
-  artifact and runs **tier-a** authenticated-HTTP checks (`scripts/frozen_verify.py`)
-  and **tier-b** headless-Playwright checks (`scripts/browser_verify.py`) on BOTH
-  install paths — **fresh install AND upgrade-over-stale** — across
-  `macos-14` (arm64), `macos-15-intel`, and `windows-latest`. See
-  `manomatika/ahimsa`.
-- **matika's launcher contract it relies on.** The frozen app refreshes a bundled
-  plugin on **every launch** when the bundled version/fingerprint differs (per-plugin
-  `.matika_plugin_install.json` marker), preserving user/runtime data — the fix for
-  the stale-plugin regression that the upgrade path exists to catch. See
-  `manomatika/matika`.
-- **eyerate's provider contract it asserts.** A provider failure surfaces LOUDLY as
-  **HTTP 502** with a `detail` body — never a silent empty result; the gate forces a
-  keyless provider and asserts the visible error. See `manomatika/eyerate`.
+See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate specification (ahimsa CI, tier-a/b checks, both install paths, component contracts).
