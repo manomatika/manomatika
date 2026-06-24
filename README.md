@@ -57,3 +57,7 @@ ManoMatika product release is the blessed, distributable thing.
 - `release-log.yaml` — human-edited source for the audit log
 - `RELEASES.md` — generated ecosystem-wide release log (do not hand-edit)
 - `ARCHITECTURE.md` — umbrella architecture doc for the full ecosystem
+
+## License
+
+ManoMatika is **source-available, not open-source**. Copyright (c) 2026 Patrick James Tallman. All rights reserved. The source is published for reference and transparency only; no usage, copying, modification, redistribution, or deployment rights are granted without a written agreement. See [LICENSE](LICENSE).
