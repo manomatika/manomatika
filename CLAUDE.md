@@ -119,6 +119,62 @@ CLAUDE.md must never knowingly contain stale information. Whenever CLAUDE.md is 
 
 See [docs/versioning.md](docs/versioning.md) for the full versioning contract (VERSION as source of truth, core/suffix rules, recipe field constraints, and version ladder).
 
+## applug trust & test posture
+
+ManoMatika is an **ecosystem for applug deployment**: the install / test / trust
+mechanism is **uniform** regardless of who authors an applug or whose
+infrastructure runs it. The product authority enforces this posture at the
+product level; the full statement of record is `docs/ManoMatikaUseCases.md`, with
+the umbrella architecture in `ARCHITECTURE.md` §9 (Trust & Security Posture) and
+§10 (Testing Model).
+
+- **Install-trust (posture (a)).** We trust everything at this stage. Installing
+  an applug — via recipe at build time, or via future runtime applug loading — **is**
+  the trust decision. There is **no first-party/third-party distinction** in
+  mechanism; matika treats every applug identically. We add hindrances to bad
+  behavior to the extent practical, with **no claim** a determined bad actor is
+  stopped.
+- **ManoMatika-org applugs are trusted by provenance** and will live in a
+  **non-public** org applug repo. The SDK only ever bundles the reference applug
+  (eyerate).
+- **Dangerous host ops** (network, filesystem, process, secrets) are expected
+  **through matika APIs** — a reduced, documented, auditable safe-by-default
+  surface. This is **convention + review, NOT a hard guarantee**: an applug is
+  in-process Python and cannot be prevented from reaching host primitives
+  directly. Never describe it as a guarantee.
+- **applug test execution is pure build automation — NOT a security boundary.**
+  The framework discovers each applug's unit tests through a known interface and
+  runs them ALL automatically at build time, identically for every applug — no
+  trust dimension, no sandbox, no isolation. (The earlier "securely execute
+  untrusted applug tests" framing was a category error and is dropped.)
+- **WASM/WASI isolation is OUT.** Rejected on complexity, a security-critical
+  runtime dependency, and the inability to run the real product stack (compiled
+  C/Rust extensions, sockets).
+
+### Three-layer testing model (keep three distinct; never collapse)
+
+- **L1 — component own suites.** Every component unit/integration-tests its OWN
+  functions in its OWN suite (matika included: auth / RBAC / CSRF / loaders).
+- **L2 — generic structural harness.** Domain-blind: every declared screen routes,
+  renders, and shows its markers. Applug-agnostic. **matika owns the contract; the
+  ahimsa gate runs it.** (A1 — merged.)
+- **L3 — applug-authored functional tests, generically invoked** by the product
+  gate via a contract. WHO AUTHORS (the applug) is separate from WHO INVOKES (the
+  generic gate). No isolation requirement.
+
+### Forward (v0.0.2) — brief pointers
+
+- **Advisory applug inspection** — a matika-owned canonical check, invoked by
+  ahimsa at build/validate and by matika at runtime load; **advisory, not
+  blocking**.
+- **matika-API capability-surface design** — formalizing the safe-by-default host
+  surface above.
+- **Runtime applug loading** (`docs/ManoMatikaUseCases.md` use case 3).
+
 ## QA gate
 
-See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate specification (ahimsa CI, tier-a/b checks, both install paths, component contracts).
+The product authority owns the QA *gate*, and it is where the three-layer model is
+**composed into the product gate**: a candidate version passes only when ahimsa's
+automated installed-artifact gate runs L1 + L2 + L3 green across the build targets,
+on BOTH install paths. See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate
+specification (ahimsa CI, tier-a/b checks, both install paths, component contracts).
