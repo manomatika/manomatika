@@ -1,7 +1,7 @@
 # ManoMatika Ecosystem Architecture
 
 **ManoMatika** | Version: **v0.0.1** | Copyright (c) 2026 Patrick James Tallman
-_Revised 2026-06-25 — added §9 Applug Trust & Security Posture and §10 Testing Model; QA-gate language updated._
+_Revised 2026-06-25 — added §9 Applug Trust & Security Posture and §10 Testing Model; QA-gate language updated. §10 reconciled to the live built gate (tier-a/tier-b L2 detail, L3 reboot-per-applug, both install arms × both scenarios × three platforms, SHA-pinned discovery) — built, not yet proven end-to-end._
 
 ---
 
@@ -196,11 +196,12 @@ Nothing is blessed before QA. Components remain prereleases until the product
 release is cut. The `manomatika/manomatika` product release is the **only**
 distributable, blessed artifact.
 
-The QA gate is the **automated testing gate** of §10: it installs and
-feature-tests the artifacts on fresh **and** upgrade paths, drives every product
-screen generically (L2), and invokes each applug's authored functional tests
-generically (L3), across all build targets. macOS x86_64 on Intel hardware
-remains the human sign-off surface for v0.0.1.
+The QA gate is the **automated testing gate** of §10: it feature-tests the FROZEN
+artifact on both install arms (build-dir and installed-artifact), in both fresh and
+upgrade scenarios, drives every product screen generically (L2), and invokes each
+applug's authored functional tests generically (L3), across all build targets. The
+gate is built but not yet proven against a live frozen artifact end-to-end (§10).
+macOS x86_64 on Intel hardware remains the human sign-off surface for v0.0.1.
 
 ---
 
@@ -327,24 +328,46 @@ Three distinct, non-substitutable layers:
 - **L1 — component own suites.** Every component unit/integration-tests its own
   functions in its own suite (matika included — auth, RBAC, CSRF, loaders; eyerate
   and ahimsa likewise).
-- **L2 — generic structural harness.** Domain-blind: every declared screen routes,
-  renders, and shows its markers. Applug-agnostic. **matika owns the contract; the
+- **L2 — generic structural harness.** Domain-blind and manifest-driven:
+  **tier-a** asserts every declared screen's route is alive, authorized, and renders
+  HTML over authenticated HTTP; **tier-b** drives each declared screen's steps
+  through a headless browser (Playwright) via a generic verb executor and asserts
+  its markers in the live DOM. Applug-agnostic. **matika owns the contract; the
   ahimsa gate runs it.**
-- **L3 — applug-authored functional tests, generically invoked.** Only the applug
-  knows what proves its function works; it authors functional tests and exposes
-  them through a contract that the product gate invokes **generically**. **WHO
-  AUTHORS (the applug) is separate from WHO INVOKES (the generic gate).**
-  Third-party applugs plug into this contract sight-unseen.
+- **L3 — applug-authored functional tests, generically invoked, reboot-per-applug.**
+  Only the applug knows what proves its function works; it authors functional tests
+  (`*_functional_tests.json`, schema version 1.0 with optional `setup`/`teardown`)
+  and exposes them through a contract the product gate invokes **generically**. The
+  gate groups tests by applug and, for each applug, boots a fresh app in a clean
+  `HOME`, runs only that applug's tests in **randomized (seeded) order**, then tears
+  down. Each test self-arranges its preconditions (declared `setup`) and self-resets
+  what it mutated (declared `teardown`, guaranteed-run try/finally); randomized order
+  is the verifier that reset discipline holds. Reboot is coarse containment
+  **between applugs only** — there is **no within-applug reboot** — and a test that
+  cannot reset its mutation is a **defect**, never rebooted-around. **WHO AUTHORS
+  (the applug) is separate from WHO INVOKES (the generic gate);** third-party applugs
+  plug into this contract sight-unseen.
 
 **applug test execution is pure build automation, not a security boundary.** The
 framework discovers each applug's tests through the known interface and runs them
 all at build time, identically for every applug — no trust dimension, no sandbox,
-no isolation (the tests are trusted like all installed applug code, per §9).
+no isolation in the security sense (the tests are trusted like all installed applug
+code, per §9). The reboot-per-applug containment of L3 is a **correctness** measure
+(clean state between applugs), not a security boundary.
 
-The **automated installed-artifact gate** composes these layers: it installs and
-feature-tests the artifacts on fresh **and** upgrade paths and runs L2 + L3
-generically across the build targets. A green gate is required before a product
-release is cut (§5).
+The **automated installed-artifact gate** composes these layers. It runs L1 + L2 +
+L3 against the FROZEN artifact on **both install arms** (the build-job build-dir
+verify and the installed-artifact install-verify), in **both scenarios** (fresh
+install and upgrade over a prior install), across all three build targets —
+`macos-14` (arm64), `macos-15-intel`, `windows-latest`. The install-verify arm
+discovers L3 tests from a **SHA-pinned source clone** (the build jobs emit the
+resolved component SHAs and install-verify checks out exactly those), so **test
+code never ships in the product artifact**. A green gate is required before a
+product release is cut (§5).
+
+The gate is **built** — implemented, unit-covered, and structurally complete — but
+**not yet proven** against a live frozen artifact end-to-end; that live red→green
+proof across all platforms and both arms is still pending.
 
 ---
 
