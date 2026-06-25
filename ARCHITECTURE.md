@@ -1,6 +1,7 @@
 # ManoMatika Ecosystem Architecture
 
 **ManoMatika** | Version: **v0.0.1** | Copyright (c) 2026 Patrick James Tallman
+_Revised 2026-06-25 — added §9 Applug Trust & Security Posture and §10 Testing Model; QA-gate language updated._
 
 ---
 
@@ -150,10 +151,15 @@ An AppLug must provide at its repo root:
 | `applug.json` | Manifest: `id`, `version`, `matika_version`; optional `name`, `entry_point`, `permissions` |
 | `<id>_menus.json` | Menu metadata (schema v1.0): optional `application`, `roles`, and `system` sections |
 | Python class extending `BaseAppLug` | `on_load(db)` and `on_unload(db)` lifecycle hooks |
+| Unit tests (L1) + functional tests (L3) via the known test interface | Discovered and run automatically at build time; functional tests are generically invoked by the product gate (see §10) |
 
 ahimsa fetches `applug.json` from the declared repo at the declared tag during
 recipe validation to verify compatibility before a build. Matika discovers
 `applug.json` at deploy time by scanning `plugins/<id>/`.
+
+Every applug — first-party or third-party — is treated identically by the
+framework; the trust model that governs this is **§9 (Applug Trust & Security
+Posture)** and the test model is **§10 (Testing Model)**.
 
 **Compatibility guarantee:** patch-level matika bumps are non-breaking within a
 minor version. A minor-version bump (`0.1.0`) may introduce breaking interface
@@ -177,7 +183,7 @@ See: [ahimsa/docs/applug-schema.md](https://github.com/manomatika/ahimsa/blob/ma
 [installer artifacts produced — macOS DMG, Windows EXE]
 (CI artifacts only; no GitHub release created by ahimsa)
           ↓
-[QA gate — macOS x86_64 DMG validated]
+[QA gate — automated installed-artifact testing gate (see §10)]
           ↓  (pass only)
 [ManoMatika product release cut]
   • tag ahimsa at the exact SHA the validated DMG was built from (notes-only)
@@ -189,6 +195,12 @@ See: [ahimsa/docs/applug-schema.md](https://github.com/manomatika/ahimsa/blob/ma
 Nothing is blessed before QA. Components remain prereleases until the product
 release is cut. The `manomatika/manomatika` product release is the **only**
 distributable, blessed artifact.
+
+The QA gate is the **automated testing gate** of §10: it installs and
+feature-tests the artifacts on fresh **and** upgrade paths, drives every product
+screen generically (L2), and invokes each applug's authored functional tests
+generically (L3), across all build targets. macOS x86_64 on Intel hardware
+remains the human sign-off surface for v0.0.1.
 
 ---
 
@@ -265,7 +277,78 @@ an actual tag.
 
 ---
 
-## 9. Component Documentation Links
+## 9. Applug Trust & Security Posture
+
+ManoMatika is an **ecosystem for applug deployment**. matika is **one uniform
+mechanism**: it behaves identically regardless of who deploys it, whose
+infrastructure it runs on, or who authored a given applug. Whatever protections
+matika provides are intrinsic to it and travel with every deployment. There is
+**no first-party / third-party distinction in mechanism.**
+
+**Trust posture — install-trust ("posture (a)").** At this stage we **trust
+everything**. Installing an applug — via recipe at build time, or via the
+forthcoming runtime applug loading — **is** the trust decision. We do not attempt
+to make trust unnecessary; we add **hindrances** to bad behavior to the extent
+practical, with no claim that a determined bad actor is stopped.
+
+- **Provenance.** ManoMatika-organization applugs are trusted by provenance and
+  will live in a **non-public** organization applug repository. The SDK only ever
+  bundles the **reference applug** (eyerate); other org applugs are optionally
+  composed into a deployment via a recipe.
+- **matika-API mediation (safe-by-default surface).** Dangerous host operations
+  (network, filesystem, process, secrets) are expected to be performed **through
+  matika APIs** — a reduced, documented, auditable surface. This is enforced as
+  **convention and review, not as a hard guarantee**: an applug is ordinary
+  in-process Python and cannot be prevented from reaching host primitives
+  directly. The goal is a small, centralized, auditable surface that the honest
+  path runs through.
+- **Explicitly rejected.** Hard runtime isolation of applug code (restricted
+  subprocess, constrained interpreter, or a WebAssembly/WASM boundary) is **out** —
+  it does not fit the in-process FastAPI model, cannot run the real product stack
+  (compiled C/Rust extensions, sockets), and adds a security-critical runtime
+  dependency. There is no Apple-Store-style certification service.
+
+**Forward (v0.0.2).** Advisory applug **inspection** (an import-linter allowlist +
+a custom AST check for dynamic-dispatch primitives + Bandit) — a **matika-owned**
+canonical check, invoked by ahimsa at recipe build/validate and by matika at
+runtime applug load, run in **advisory** mode (surfaces findings; a human decides;
+a hygiene/review gate, not a safety guarantee); the matika-API **capability
+surface** design; and **runtime applug loading**.
+
+The authoritative statement of this posture and its use cases is
+`docs/ManoMatikaUseCases.md`.
+
+---
+
+## 10. Testing Model
+
+Three distinct, non-substitutable layers:
+
+- **L1 — component own suites.** Every component unit/integration-tests its own
+  functions in its own suite (matika included — auth, RBAC, CSRF, loaders; eyerate
+  and ahimsa likewise).
+- **L2 — generic structural harness.** Domain-blind: every declared screen routes,
+  renders, and shows its markers. Applug-agnostic. **matika owns the contract; the
+  ahimsa gate runs it.**
+- **L3 — applug-authored functional tests, generically invoked.** Only the applug
+  knows what proves its function works; it authors functional tests and exposes
+  them through a contract that the product gate invokes **generically**. **WHO
+  AUTHORS (the applug) is separate from WHO INVOKES (the generic gate).**
+  Third-party applugs plug into this contract sight-unseen.
+
+**applug test execution is pure build automation, not a security boundary.** The
+framework discovers each applug's tests through the known interface and runs them
+all at build time, identically for every applug — no trust dimension, no sandbox,
+no isolation (the tests are trusted like all installed applug code, per §9).
+
+The **automated installed-artifact gate** composes these layers: it installs and
+feature-tests the artifacts on fresh **and** upgrade paths and runs L2 + L3
+generically across the build targets. A green gate is required before a product
+release is cut (§5).
+
+---
+
+## 11. Component Documentation Links
 
 | Document | Location |
 |---|---|
