@@ -155,12 +155,22 @@ the umbrella architecture in `ARCHITECTURE.md` §9 (Trust & Security Posture) an
 
 - **L1 — component own suites.** Every component unit/integration-tests its OWN
   functions in its OWN suite (matika included: auth / RBAC / CSRF / loaders).
-- **L2 — generic structural harness.** Domain-blind: every declared screen routes,
-  renders, and shows its markers. Applug-agnostic. **matika owns the contract; the
-  ahimsa gate runs it.** (A1 — merged.)
-- **L3 — applug-authored functional tests, generically invoked** by the product
-  gate via a contract. WHO AUTHORS (the applug) is separate from WHO INVOKES (the
-  generic gate). No isolation requirement.
+- **L2 — generic structural harness.** Domain-blind, manifest-driven: **tier-a**
+  asserts every declared screen's route is alive, authorized, and renders HTML over
+  authenticated HTTP; **tier-b** drives each declared screen's steps through a
+  headless browser (Playwright) via a generic verb executor and asserts its markers
+  in the live DOM. Applug-agnostic. **matika owns the contract; the ahimsa gate runs
+  it.**
+- **L3 — applug-authored functional tests, generically invoked, reboot-per-applug.**
+  The product gate discovers each applug's `*_functional_tests.json` (schema v1.0,
+  optional `setup`/`teardown`), groups by applug, and for each boots a fresh app in
+  a clean `HOME`, runs only that applug's tests in randomized (seeded) order, then
+  tears down. Each test self-arranges its preconditions and self-resets what it
+  mutated (guaranteed-run try/finally); randomized order verifies reset discipline.
+  Reboot is coarse containment between applugs only (no within-applug reboot) — a
+  **correctness** measure, NOT security isolation — and a test that cannot reset its
+  mutation is a **defect**, never rebooted-around. WHO AUTHORS (the applug) is
+  separate from WHO INVOKES (the generic gate).
 
 ### Forward (v0.0.2) — brief pointers
 
@@ -175,6 +185,10 @@ the umbrella architecture in `ARCHITECTURE.md` §9 (Trust & Security Posture) an
 
 The product authority owns the QA *gate*, and it is where the three-layer model is
 **composed into the product gate**: a candidate version passes only when ahimsa's
-automated installed-artifact gate runs L1 + L2 + L3 green across the build targets,
-on BOTH install paths. See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate
-specification (ahimsa CI, tier-a/b checks, both install paths, component contracts).
+automated installed-artifact gate runs L1 + L2 + L3 green against the FROZEN
+artifact on BOTH install arms (build-dir + installed-artifact), in BOTH scenarios
+(fresh + upgrade), across all three platforms (`macos-14` arm64, `macos-15-intel`,
+`windows-latest`). The gate is **built but not yet proven** against a live frozen
+artifact end-to-end. See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate
+specification (install arms, tier-a/b structural checks, L3 reboot-per-applug
+invocation, component contracts).
