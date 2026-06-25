@@ -1,5 +1,5 @@
 # ManoMatika v0.0.1 — Execution Plan
-**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`); 2026-06-14 (preconditions resolved, phase model added, #1–#3 marked complete); 2026-06-14 (task #4 cc-owned closures moved to Phase-1/Lane-A — see §4 item 19); 2026-06-14 (Lane-A tasks #4–#7 ahimsa-piece marked complete; mm#4, ahimsa#55/#56/#57/#58 merged; Phase 1 + Phase 2 complete)  
+**Generated:** 2026-06-02 | **Revised:** 2026-06-09 (architecture redesign — product authority moved to `manomatika/manomatika`); 2026-06-14 (preconditions resolved, phase model added, #1–#3 marked complete); 2026-06-14 (task #4 cc-owned closures moved to Phase-1/Lane-A — see §4 item 19); 2026-06-14 (Lane-A tasks #4–#7 ahimsa-piece marked complete; mm#4, ahimsa#55/#56/#57/#58 merged; Phase 1 + Phase 2 complete); 2026-06-25 (testing-gate arc #11–#14 reconciled in; applug security/test posture decided — WASM dropped, install-trust posture (a), applug test execution is build automation; v0.0.2 next-release section added)  
 **Composition (the blessed triple):** matika v0.0.4 + eyerate v0.0.4 + ahimsa v0.0.1  
 **Planner:** Claude Code, read-only investigation
 
@@ -23,9 +23,66 @@
 
 ---
 
+## CURRENT STATUS — TASK ARC #11–#14 (2026-06-25, authoritative for remaining work)
+
+> **Why this section exists.** The §1 sequence (below) was authored 2026-06-02…06-14 and captured the release-prep work (mm standup, recipe + audit-log relocation, engine retarget, docs refactor) — **all of which is COMPLETE**. After it was written, the smoke-grade manual QA of §1 step 10 let a stale-plugin regression escape to real hardware, which spawned a dedicated **automated installed-artifact testing gate**. That gate plus the cut/close steps is the **current release arc (#11–#14)** and is authoritative for all remaining work. §1 steps 8–13 are retained below as the underlying release mechanics; the cut/RELEASES/close steps now live under #12/#13/#14, with the testing gate (#11) inserted before the cut.
+>
+> **Numbering note:** the #11–#14 arc here is the current working numbering and is **not** the same as §1's step numbers (e.g. §1 step 11 "cut" = arc **#12**).
+
+### Applug security & test posture — DECIDED 2026-06-25
+
+- **Trust posture (a): install-trust.** We trust everything at this stage; installing an applug (via recipe, or future runtime load) **is** the trust decision. We add hindrances to bad behavior to the extent practical, with no claim that a determined bad actor is stopped. Org-authored applugs are trusted by provenance (non-public org applug repo). Full statement: `docs/ManoMatikaUseCases.md`.
+- **applug test execution is pure build automation — NOT a security boundary.** The framework discovers every applug's unit tests through a known interface and runs them all at build time, identically for every applug (no first/third-party distinction, no trust dimension, no sandbox). The earlier "securely execute untrusted applug tests" framing was a category error and is dropped.
+- **WASM/WASI isolation is OUT.** Rejected on complexity, a security-critical runtime dependency, and the fact that it cannot run the real product test stack (compiled C/Rust extensions, sockets). The earlier overnight "WASM vs loosen vs shift" decision is resolved by removing its premise.
+- **Three-layer testing model** (unchanged, now free of any isolation requirement): **L1** each component unit/integration-tests its own functions; **L2** generic structural harness (A1, merged); **L3** applug-authored functional tests generically invoked by the gate via a contract.
+
+### #11 — Automated installed-artifact screen + functional testing gate (ACTIVE — unblocked)
+
+One CI dispatch installs + feature-tests all three installers on fresh + upgrade paths, drives every product screen generically (L2), invokes applug-authored functional tests generically (L3), cross-checks the live route table, and auto-files a deduped issue on failure. Runs at rc AND final. No test-only code ships in the product.
+
+**Completed**
+- Phase 0 — M1 (matika#84), A4 (ahimsa#81), E2 (eyerate#51) — merged.
+- Phase 1 — M2 (matika#85), M3 (matika#86), E1 (eyerate#52) — merged.
+- A1 keystone — manifest-driven tier-a/tier-b structural harness (ahimsa#82, PR #100) — merged.
+- Node-EOL hygiene — `download-artifact@v4 → v8` (ahimsa#99) — merged.
+- All four repos public + proprietary source-available LICENSE (manomatika#32, matika#100, eyerate#64, ahimsa#103) — merged.
+- arm64 + Windows automated install-and-verify ran live GREEN (A4, 06-22) — advances #14.
+- **Secure-execution decision RESOLVED (2026-06-25)** — see posture above; #11 unblocked.
+- **`docs/ManoMatikaUseCases.md`** rewritten to the decided posture, committed, pushed.
+
+**Remaining**
+- **Doc cleanup (NEXT task)** — propagate posture (a) / WASM-out / three-layer model into: this plan (`manomatika-v0.0.1-plan.md`), the four CLAUDE.md files, and `ARCHITECTURE.md`.
+- **Layer-3 PRs rework** (matika#99, ahimsa#102, eyerate#63) — drop the obsolete secure-execution framing; keep the generic functional-test contract; add inter-applug hygiene (fresh session + product-state reset + failure isolation between applugs) as a **correctness** concern, not security.
+- **Independent Layer-3 defects** (fix regardless of the above): genericity guard asserted-not-demonstrated (inject into the real gate); M4 parity passes vacuously (matika#87 — compare real matika canon vs ahimsa's mirror, or don't close #87); eyerate decoy securities marker (eyerate#61/#63 — reground on real rendered content, not the hidden empty div).
+- **M4 / A2 / A3** (matika#87, ahimsa#83, ahimsa#84) — P2; unblocked by A1.
+- **A5** (ahimsa#85) — P4; single dispatch + rc/final trigger + first real cross-repo dispatch-proof.
+- **MM1** (manomatika#27) — P4; QA-gate definition update (`ARCHITECTURE.md` + QA-gate section).
+- **A6** (ahimsa#86) — P4; auto-issue-on-failure (deduped).
+
+### #12 — Cut ManoMatika v0.0.1
+Gated by green #11. Final bare-core tags at validated SHAs → mm manifest/BOM (pin by tag + resolved SHA) → mm release notes → mm v0.0.1 release with the validated DMG. Re-verify a final build first. *(= §1 step 11 below.)*
+
+### #13 — Regenerate `RELEASES.md`
+Via the engine so the audit log records v0.0.1. *(= §1 step 12 below.)*
+
+### #14 — Close out
+Record arm64 + Windows as covered by the #11 automated gate. *(Subsumes §1 step 13's deferred-close trail for the platforms now exercised by #11.)*
+
+---
+
+## NEXT RELEASE (v0.0.2) — forward backlog (captured 2026-06-25)
+
+> Items surfaced in the 2026-06-25 security/test-posture session, parked for the **v0.0.2 planning session**. None gates v0.0.1 — the reference applug (eyerate) is trusted, and v0.0.1 ships only it. (Other forward items live in the §1 Backlog and §2 Out-of-Scope/Deferred.)
+
+- **Advisory applug inspection.** An import-linter **allowlist** contract (stdlib subset + `matika.*` + the applug's own package) + a small custom **AST check** for dynamic-dispatch primitives (`eval`/`exec`/`compile`/`__import__`/`importlib`/builtin `getattr`) + **Bandit** as a broad pass. **matika owns the canonical check**; ahimsa invokes it at recipe build/validate; matika invokes the same check at runtime applug load. **Mode: advisory** (surfaces findings; human decides) — a hygiene/review gate, explicitly **not** a safety guarantee. (Distinct from dependency-CVE scanning via pip-audit/safety.)
+- **Capability surface design.** The concrete set of host operations (network, filesystem, process, secrets, …) mediated through matika APIs, and the shape of each API — the "dangerous activity only through matika" safe-by-default surface (convention, not hard enforcement; in-process Python cannot guarantee it).
+- **Runtime applug loading (use case 3).** Load an applug into a running ManoMatika instance (beyond recipe-time composition); the install-trust posture, capability surface, and advisory inspection all attach at load time.
+
+---
+
 ## 1. AUTHORITATIVE EXECUTION SEQUENCE
 
-This 13-item ordered list is the canonical sequence for v0.0.1. It supersedes the old Wave 1–6 orchestration (archived in the Appendix).
+This 13-item ordered list is the release-prep + release-mechanics sequence for v0.0.1. Steps 1–7 (release-prep) are **COMPLETE**; steps 8–13 (release mechanics) remain valid. The **authoritative current view of remaining work is the Current Status task arc (#11–#14) above** — in particular the automated testing gate (#11) is inserted before the cut (step 11 = arc #12). It supersedes the old Wave 1–6 orchestration (archived in the Appendix).
 
 1. **Settle the CLAUDE.md staleness guardrail.** Rule: CLAUDE.md never knowingly contains stale info; every factual claim is verified against actual repo state on each edit/regeneration; when unverifiable, omit. **[COMPLETE — executed in parallel.]**
 2. **Delete the local `matika v0.0.4-dev.*` tags** (hygiene). **[COMPLETE]** — Remote dev tags removed; matika carries v0.0.1/v0.0.2/v0.0.3 only (verified 2026-06-14 against live GitHub).
@@ -310,7 +367,7 @@ Decisions recorded for traceability. Items updated for the 2026-06-09 redesign a
 
 **Gate 1 — component prerelease tags exist:** matika v0.0.4 and eyerate v0.0.4 (both **prereleases, notes-only**) must be tagged before the ahimsa `build.yml` dispatch can resolve the recipe (now fetched **from mm**, pinning those tags). The recipe's `applug.json@v0.0.4` fetch 404s until the tags exist (§1 step 8 precedes step 9).
 
-**Gate 2 — QA sign-off on the x86_64 DMG artifact:** the macOS **x86_64** DMG **artifact** must pass the mm QA gate (TC-B, smoke-grade, Intel hardware) before any product release is cut. arm64 and Windows are **deferred**, not gating (§1 steps 10, 13).
+**Gate 2 — QA sign-off, now via the automated testing gate (#11):** the macOS **x86_64** DMG artifact must pass QA before any product release is cut. The original smoke-grade manual TC-B check (§1 step 10) is **superseded by the automated installed-artifact gate (#11)**, which exercises fresh + upgrade installs and drives all three platforms generically (L2) plus applug-authored functional tests (L3). The x86_64 DMG passed ad-hoc V&V on physical Intel hardware; arm64 + Windows install-and-verify have run GREEN under the gate (advances #14), so they are now **covered by #11**, not deferred.
 
 **Gate 3 — ahimsa tagged at the validated SHA:** ahimsa v0.0.1 is tagged at the **exact `main` SHA the validated DMG was built from**, and the mm product manifest pins all three components by **tag + resolved SHA** before the mm v0.0.1 release is cut (§1 step 11).
 
