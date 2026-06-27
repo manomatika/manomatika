@@ -6,6 +6,49 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.9
+
+- **Date:** 2026-06-26
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#103
+- **Summary:** Ninth release candidate for matika v0.0.4 (A5 #11) — corrects all 17
+  stale/speculative markers in matika_screens.json. Root cause: the manifest was
+  authored without consulting the templates, inventing a generic
+  #…-form/.…-table/#…-container convention while the templates use deliberate
+  page-prefixed schemes (hp-*, abt-*, us-*, and real ids roles-table, user-
+  table, permission-editor). Six screens failed the tier-b gate entirely (all
+  markers absent: home, about, admin_roles, admin_permissions, admin_users,
+  user_settings); eleven passed via OR-semantics but each carried at least one
+  stale id-marker. Fix: every marker replaced with a selector that actually
+  renders in the screen's template, verified against live DOM via local arm
+  tier-b run (all 17 core screens show 'marker present'). Regression (rule 22):
+  test_screen_marker_resolution.py statically validates every declared marker
+  resolves to a real selector in the rendering template(s) — FAILS on old
+  manifest (25 stale markers caught), PASSES on this fix (25/25 green). Full
+  matika suite 100% clean (544 passed, 0
+  failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
+  v0.0.4-rc.4. Notes-only GitHub prerelease for QA.
+
+## eyerate v0.0.4-rc.4
+
+- **Date:** 2026-06-26
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/eyerate#70
+- **Summary:** Fourth release candidate for eyerate v0.0.4 (A5 #11) — two fixes that
+  unblocked tier-b L2. (1) securities_lookup_error screen: the route previously
+  ended on /eyerate/admin after triggering a 502 lookup, so tier-b asserted
+  markers on the wrong page; fix navigates back to /eyerate/securities before
+  the marker assert (screen_id matches its declared route). (2) Admin securities
+  lookup auto-select: when the /lookup response returns exactly one match and
+  the dialog is in single-select mode, the fix auto-selects it and clears the
+  dialog so the #field-symbol input is reliably populated before assert_value
+  reads it (eliminates the async-fill race that required the ahimsa polling
+  fix). Both fixes include rule-22 regression tests. Full eyerate suite 100%
+  clean. Paired with manomatika/matika v0.0.4-rc.9. Notes-only GitHub prerelease
+  for QA.
+
 ## matika v0.0.4-rc.7
 
 - **Date:** 2026-06-20
