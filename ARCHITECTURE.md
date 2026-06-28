@@ -1,7 +1,7 @@
 # ManoMatika Ecosystem Architecture
 
 **ManoMatika** | Version: **v0.0.1** | Copyright (c) 2026 Patrick James Tallman
-_Revised 2026-06-25 — added §9 Applug Trust & Security Posture and §10 Testing Model; QA-gate language updated. §10 reconciled to the live built gate (tier-a/tier-b L2 detail, L3 reboot-per-applug, both install arms × both scenarios × three platforms, SHA-pinned discovery) — built, not yet proven end-to-end._
+_Revised 2026-06-25 — added §9 Applug Trust & Security Posture and §10 Testing Model; QA-gate language updated. §10 reconciled to the live built gate (tier-a/tier-b L2 detail, L3 reboot-per-applug, both install arms × both scenarios × three platforms, SHA-pinned discovery) — built and proven green end-to-end._
 
 ---
 
@@ -200,7 +200,7 @@ The QA gate is the **automated testing gate** of §10: it feature-tests the FROZ
 artifact on both install arms (build-dir and installed-artifact), in both fresh and
 upgrade scenarios, drives every product screen generically (L2), and invokes each
 applug's authored functional tests generically (L3), across all build targets. The
-gate is built but not yet proven against a live frozen artifact end-to-end (§10).
+gate is built and proven green against a live frozen artifact end-to-end (§10).
 macOS x86_64 on Intel hardware remains the human sign-off surface for v0.0.1.
 
 ---
@@ -365,9 +365,9 @@ resolved component SHAs and install-verify checks out exactly those), so **test
 code never ships in the product artifact**. A green gate is required before a
 product release is cut (§5).
 
-The gate is **built** — implemented, unit-covered, and structurally complete — but
-**not yet proven** against a live frozen artifact end-to-end; that live red→green
-proof across all platforms and both arms is still pending.
+The gate is **built** — implemented, unit-covered, and structurally complete — and
+**proven green** against a live frozen artifact end-to-end; a live dispatch ran green
+across all three platforms and both install arms.
 
 ---
 

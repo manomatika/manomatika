@@ -36,18 +36,17 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 - **Status:** published
 - **Artifact:** none (notes-only GitHub prerelease)
 - **PRs:** manomatika/eyerate#70
-- **Summary:** Fourth release candidate for eyerate v0.0.4 (A5 #11) — two fixes that
-  unblocked tier-b L2. (1) securities_lookup_error screen: the route previously
-  ended on /eyerate/admin after triggering a 502 lookup, so tier-b asserted
-  markers on the wrong page; fix navigates back to /eyerate/securities before
-  the marker assert (screen_id matches its declared route). (2) Admin securities
-  lookup auto-select: when the /lookup response returns exactly one match and
-  the dialog is in single-select mode, the fix auto-selects it and clears the
-  dialog so the #field-symbol input is reliably populated before assert_value
-  reads it (eliminates the async-fill race that required the ahimsa polling
-  fix). Both fixes include rule-22 regression tests. Full eyerate suite 100%
-  clean. Paired with manomatika/matika v0.0.4-rc.9. Notes-only GitHub prerelease
-  for QA.
+- **Summary:** Fourth release candidate for eyerate v0.0.4 (A5 #11) — a single route fix
+  that unblocked tier-b L2 (PR manomatika/eyerate#70, one commit "fix:
+  lookup_error screen returns to its declared route before marker assertion").
+  The securities_lookup_error screen's route previously ended on /eyerate/admin
+  after triggering a 502 lookup, so tier-b asserted markers on the wrong page;
+  the fix navigates back to /eyerate/securities before the marker assert
+  (screen_id matches its declared route). The tier-b securities marker now
+  passes via the ahimsa assert_value polling fix (manomatika/ahimsa#108), not
+  any eyerate change. Includes a rule-22 regression test. Full eyerate suite
+  100% clean. Paired with manomatika/matika v0.0.4-rc.9. Notes-only GitHub
+  prerelease for QA.
 
 ## matika v0.0.4-rc.7
 

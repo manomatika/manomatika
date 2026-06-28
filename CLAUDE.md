@@ -190,7 +190,7 @@ The product authority owns the QA *gate*, and it is where the three-layer model 
 automated installed-artifact gate runs L1 + L2 + L3 green against the FROZEN
 artifact on BOTH install arms (build-dir + installed-artifact), in BOTH scenarios
 (fresh + upgrade), across all three platforms (`macos-14` arm64, `macos-15-intel`,
-`windows-latest`). The gate is **built but not yet proven** against a live frozen
-artifact end-to-end. See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate
+`windows-latest`). The gate is **built and proven green end-to-end** against a live
+frozen artifact across all three platforms and both install arms. See [docs/qa-gate.md](docs/qa-gate.md) for the full QA gate
 specification (install arms, tier-a/b structural checks, L3 reboot-per-applug
 invocation, component contracts).
