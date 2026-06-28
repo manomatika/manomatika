@@ -8,10 +8,10 @@ gate. The verification *mechanism* lives in the components and is cross-referenc
 here (not duplicated): the gate is run by ahimsa, the L2 structural contract is
 owned by matika, and each applug authors its own L3 functional tests.
 
-**Status:** the gate is **BUILT** — implemented, unit-covered, and structurally
-complete — but **not yet PROVEN** against a live frozen artifact. The live
-end-to-end proof (a real dispatch driven red→green across all three platforms and
-both install arms) is still pending; do not describe the gate as proven.
+**Status:** the gate is **PROVEN green end-to-end** against a live frozen artifact.
+A real dispatch ran green across all three platforms and both install arms, in both
+scenarios (fresh + upgrade) — tier-a 20 screens, tier-b 17 markers, and L3 eyerate
+3/3, all non-skipped.
 
 A candidate product version passes the gate when ahimsa's `build.yml` runs
 **L1 + L2 + L3 green** against the FROZEN artifact on BOTH install arms, in BOTH
