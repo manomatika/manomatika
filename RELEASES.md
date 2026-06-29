@@ -6,6 +6,26 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.11
+
+- **Date:** 2026-06-29
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#109 manomatika/matika#110
+- **Summary:** Eleventh release candidate for matika v0.0.4 — frozen-app lifecycle fixes:
+  adds GET /healthz (unauthenticated; {product, version, status}; no DB calls)
+  as the keystone readiness and port-recovery endpoint; replaces the 1.5s blind
+  browser timer with a health-gated readiness poll; replaces TCP-connect port
+  detection with crash-safe port-bind detection; adds graceful single-instance
+  recovery (bind-fail + our healthz → reopen browser, exit 0; foreign → fail
+  loud, exit 1); replaces uvicorn.run() with explicit Server(Config()) +
+  SIGTERM/SIGINT handlers + timeout_graceful_shutdown=5; adds
+  multiprocessing.freeze_support() at the frozen entry point (D3 respawn fix);
+  consolidates to one canonical launcher (scripts/launcher.py deleted);
+  reconciles VERSION to rc.11 via sync_version --verify-tag enforcement (D5).
+  Exhaustive unit tests (567 passed, 0 failed/skipped/warnings). Paired with
+  manomatika/eyerate v0.0.4-rc.5. Notes-only GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.10
 
 - **Date:** 2026-06-29
