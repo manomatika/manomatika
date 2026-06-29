@@ -6,6 +6,46 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.10
+
+- **Date:** 2026-06-29
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#108
+- **Summary:** Tenth release candidate for matika v0.0.4 — adds the canonical
+  i18n-completeness checker (matika owns i18n) and completes matika-core Spanish
+  parity (phase 2 of manomatika/eyerate#73). The checker enforces a STRICT
+  contract: every i18n key referenced in source (templates, routes, and
+  menu/manifest/metadata JSON) must resolve in EVERY shipped locale (R1), and
+  all locales must be at parity (R2); a miss fails loud naming the key, locale
+  and file (rule 18). It is the ONE implementation, consumed unchanged by
+  eyerate's L1 suite and the ahimsa build gate (no reimplementation). Authored
+  29 es translations for en/es parity plus 11 keys that were referenced but
+  undefined (th_name was a bare blank-render defect of the #73 class); dropped
+  redundant inline template `t.X or 'fallback'` literals (catalog is the single
+  source of truth) and added a dedicated btn_clear key for the clear-permissions
+  button. Full matika suite 100% clean (545 passed, 0
+  failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
+  v0.0.4-rc.5. Notes-only GitHub prerelease for QA.
+
+## eyerate v0.0.4-rc.5
+
+- **Date:** 2026-06-29
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/eyerate#75
+- **Summary:** Fifth release candidate for eyerate v0.0.4 — adopts matika's canonical
+  i18n-completeness checker in eyerate's L1 suite and completes eyerate's
+  Spanish translations (phase 2 of manomatika/eyerate#73, which it closes). Adds
+  three keys that were referenced but undefined
+  (heading_financial_security_lookup, heading_financial_security_endpoints,
+  label_active_endpoint) in en+es and the missing es menu_eyerate; drops
+  redundant inline template fallbacks; simplifies the phase-1 toolbar-title
+  resolution to t["item_securities"] so a missing key raises loudly (rule 18)
+  rather than self-defaulting to the raw key name. Full eyerate suite 100% clean
+  (178 passed, 0 failed/skipped/xfail/deselected/warnings). Paired with
+  manomatika/matika v0.0.4-rc.10. Notes-only GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.9
 
 - **Date:** 2026-06-26
@@ -36,10 +76,10 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 - **Status:** published
 - **Artifact:** none (notes-only GitHub prerelease)
 - **PRs:** manomatika/eyerate#70
-- **Summary:** Fourth release candidate for eyerate v0.0.4 (A5 #11) — a single route fix
-  that unblocked tier-b L2 (PR manomatika/eyerate#70, one commit "fix:
-  lookup_error screen returns to its declared route before marker assertion").
-  The securities_lookup_error screen's route previously ended on /eyerate/admin
+- **Summary:** Fourth release candidate for eyerate v0.0.4 (A5 #11) — a single route fix that
+  unblocked tier-b L2 (PR manomatika/eyerate#70, one commit "fix: lookup_error
+  screen returns to its declared route before marker assertion"). The
+  securities_lookup_error screen's route previously ended on /eyerate/admin
   after triggering a 502 lookup, so tier-b asserted markers on the wrong page;
   the fix navigates back to /eyerate/securities before the marker assert
   (screen_id matches its declared route). The tier-b securities marker now
