@@ -6,6 +6,39 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.12
+
+- **Date:** 2026-06-30
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#114
+- **Summary:** Twelfth release candidate for matika v0.0.4 — launcher health-gated startup
+  reclaim (closes manomatika/matika#113). Replaces the binary "port in use ->
+  defer or fail" startup check with a reclaim-capable decision tree: GET
+  /healthz is the sole authority for "a healthy server is up" (process-alive /
+  port-bound alone are never sufficient). A held port whose /healthz doesn't
+  answer healthy is no longer automatically treated as a foreign collision — the
+  holder is identified via psutil (cross-platform, no per-OS branching) and a
+  positively-identified dead/wedged ManoMatika process is force-killed so the
+  launch proceeds fresh; a foreign or unidentifiable holder still fails loud
+  (now naming the holder PID) and is never killed. Adds a short bounded retry on
+  the startup /healthz probe so a still-starting server isn't mistaken for dead,
+  introduces MATIKA_PORT as server-port configuration metadata, and adds psutil
+  as a new frozen runtime dependency (matika.spec collect_all). All control flow
+  lives in one orchestrating function, _handle_port_conflict, called from
+  main(); it returns normally only on a successful reclaim and calls sys.exit()
+  for every other outcome. Branches covered: port free, healthy-ours (defer +
+  tab), dead-ours (reclaim -> kill -> restart), foreign-holder (fail loud, no
+  kill), ambiguous/unidentifiable holder (fail loud, no kill), slow-startup-
+  answers-within-retry (no needless kill), reclaim-kill-but-port-still- held
+  (fail loud). Full matika suite 100% clean (597 passed, 0 failed/
+  skipped/xfail/deselected/warnings). Paired with manomatika/eyerate v0.0.4-rc.5
+  (unchanged) and the ahimsa frozen-artifact gate regression
+  (manomatika/ahimsa#124: assert_reclaim_recovers_dead_holder +
+  assert_foreign_holder_not_killed) that proves the reclaim and foreign-holder-
+  protection behavior on the live frozen binary, both install paths. Notes-only
+  GitHub prerelease for QA.
+
 ## matika v0.0.4-rc.11
 
 - **Date:** 2026-06-29
