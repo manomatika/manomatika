@@ -42,10 +42,19 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
   the pre-fix rc.13 launcher and pass with the fix. Full matika suite 100% clean
   (619 passed, 0 failed/skipped/xfail/deselected/warnings); full ahimsa suite
   100% clean (421 passed). Paired with manomatika/eyerate v0.0.4-rc.5
-  (unchanged). Notes-only GitHub prerelease for QA. PENDING the ahimsa frozen-
-  artifact gate run across all three platforms and both install arms (dispatched
-  from this repin) — NOT yet gate-proven; this entry will be flipped to gate-
-  proven with the green run ID only after a confirmed-green gate.
+  (unchanged). Notes-only GitHub prerelease for QA. GATE-PROVEN on the frozen
+  artifact — ahimsa gate run 28529124053 (green;
+  https://github.com/manomatika/ahimsa/actions/runs/28529124053) across all
+  three platforms (macos-14 arm64, macos-15-intel, windows-latest), both install
+  arms (build-dir + installed-artifact), both scenarios (fresh + upgrade), all
+  layers non-skipped. The reconciled assert_foreign_holder_not_killed passed on
+  all 12 platform x arm x scenario combinations with a FAST fail-loud
+  (~3.8-4.1s, no modal block — the 120s "did not exit within" signature that
+  failed rc.13 and rc.14 is gone); assert_reclaim_recovers_dead_holder passed
+  (12x); and the Windows smoke-launch that rc.14's connect-probe regressed is
+  green again (server bound / responding). This confirmation is recorded only
+  AFTER the green gate, never before (the mistake that made rc.13's record
+  false).
 
 ## matika v0.0.4-rc.14
 
