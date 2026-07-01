@@ -1,5 +1,45 @@
 entries:
   - repo: matika
+    tag: v0.0.4-rc.13
+    date: "2026-06-30"
+    status: published
+    artifact: "none (notes-only GitHub prerelease)"
+    prs: "manomatika/matika#115"
+    summary: >
+      Thirteenth release candidate for matika v0.0.4 — fixes the launcher
+      foreign-holder defect the ahimsa gate caught on rc.12 (gate run
+      28482492386: assert_foreign_holder_not_killed FAILED on all three
+      platforms; closes manomatika/matika#113). Root cause: the port-conflict
+      gate keyed off a bind-only probe (_port_available) that sets SO_REUSEADDR;
+      a well-behaved foreign holder ALSO sets SO_REUSEADDR, so two SO_REUSEADDR
+      sockets can bind the same port and bind() succeeds against a genuinely-held
+      port — the probe reported the port FREE, _handle_port_conflict never fired,
+      and the app booted straight through the foreign socket (macOS: 120s hang;
+      Windows: raw uvicorn [Errno 10048] later, never the launcher's fail-loud
+      message). bind() success is not a valid "is this port in use?" test.
+      Fix: a new _resolve_port_conflict() runs EARLY in main() — BEFORE first-run
+      init, DB/alembic stamping, and plugin extraction — so a held port fails
+      loud FAST. The psutil holder-lookup (_find_port_holder_pid) is now the
+      AUTHORITY for "is the port held, and by whom", not the bind probe: no
+      holder + bind ok -> free -> boot; no holder + bind fails -> ambiguous ->
+      fail loud; holder present -> /healthz -> healthy-defer (requires status==ok
+      AND product==ManoMatika) / reclaim-ours / fail-loud-foreign (message keeps
+      the "NOT identified as a ManoMatika process" + "refusing to kill" strings
+      and the holder PID, and never kills). _port_available is downgraded to a
+      documented secondary net (a bind FAILURE is reliable "held" evidence; bind
+      SUCCESS is trusted as "free" only when psutil also finds no holder). The
+      proven-good reclaim path (assert_reclaim_recovers_dead_holder, green on
+      rc.12) is preserved. Also bumps VERSION 0.0.4-rc.11 -> 0.0.4-rc.13 (it was
+      never bumped for rc.12, so the frozen build self-reported the wrong
+      version; VERSION is the single source of truth). Tests cover every branch;
+      a new SO_REUSEADDR foot-gun regression test fails against the pre-fix
+      launcher (DID NOT RAISE SystemExit) and passes with the fix. Full matika
+      suite 100% clean (603 passed, 0 failed/skipped/xfail/deselected/warnings).
+      Paired with manomatika/eyerate v0.0.4-rc.5 (unchanged). Notes-only GitHub
+      prerelease for QA; gate-proven on the frozen artifact across all three
+      platforms and both install arms.
+
+  - repo: matika
     tag: v0.0.4-rc.12
     date: "2026-06-30"
     status: published
