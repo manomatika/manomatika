@@ -6,6 +6,47 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.15
+
+- **Date:** 2026-07-01
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#117
+- **Summary:** Fifteenth release candidate for matika v0.0.4 — recovery from the foreign-
+  holder saga: R1 base + industry-standard fail-loud on the foreign path.
+  Reverts rc.14's connect()-based _port_held() probe (manomatika/matika#116): it
+  never fixed the foreign-holder assertion and introduced a Windows smoke-launch
+  regression (a connect-timeout on a genuinely FREE port was treated as held, so
+  a fresh boot failed loud instead of serving). Base is R1 = rc.13 — bind-based
+  _port_available() as the secondary net, psutil holder-lookup as the authority
+  for "who holds the port". The real defect on the foreign / unidentifiable path
+  was NOT detection (rc.13 detected the foreign holder correctly and logged the
+  fail-loud keywords) but the fail SURFACE: _show_port_error() opened a MODAL Tk
+  dialog (messagebox.showerror) that blocked the full 120s budget on the
+  macos-14 / macos-15-intel / windows-latest gate runners (which have a window
+  server) — the "app did not exit within 120s" signature that failed
+  assert_foreign_holder_not_killed on all three platforms for BOTH rc.13 and
+  rc.14. Fix: a new _gui_dialogs_available() gate (CI / MATIKA_HEADLESS ->
+  false; else isatty / macOS|Windows / DISPLAY|WAYLAND_DISPLAY) guards EVERY Tk
+  surface (_show_port_error, _show_fatal_dialog, first-run setup dialog), and
+  each now writes the failure (port + holder PID + best-effort holder name) to
+  stderr FIRST, unconditionally, then only pops a modal when interactive. A
+  headless/CI run logs and exits non-zero PROMPTLY — it can never block on an
+  un-dismissable modal. The rc.11 lifecycle fixes (healthz poll, graceful
+  shutdown, freeze_support) and the rc.12 reclaim-ours path (dead/wedged same-
+  app -> psutil-identify -> force-kill + restart) are kept intact. Paired ahimsa
+  gate change (manomatika/ahimsa#126) adds an explicit FAST-exit assertion (a
+  foreign-holder conflict must fail loud well under the 120s budget, not merely
+  within it), with prove-it-live unit tests that drive the real assertion
+  against a real spawned foreign listener. matika regression tests fail against
+  the pre-fix rc.13 launcher and pass with the fix. Full matika suite 100% clean
+  (619 passed, 0 failed/skipped/xfail/deselected/warnings); full ahimsa suite
+  100% clean (421 passed). Paired with manomatika/eyerate v0.0.4-rc.5
+  (unchanged). Notes-only GitHub prerelease for QA. PENDING the ahimsa frozen-
+  artifact gate run across all three platforms and both install arms (dispatched
+  from this repin) — NOT yet gate-proven; this entry will be flipped to gate-
+  proven with the green run ID only after a confirmed-green gate.
+
 ## matika v0.0.4-rc.14
 
 - **Date:** 2026-06-30
@@ -80,8 +121,18 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
   fails against the pre-fix launcher (DID NOT RAISE SystemExit) and passes with
   the fix. Full matika suite 100% clean (603 passed, 0
   failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
-  v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for QA; gate-proven on
-  the frozen artifact across all three platforms and both install arms.
+  v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for QA. CORRECTION
+  (rc.15): this entry originally claimed "gate-proven on the frozen artifact
+  across all three platforms and both install arms" — that claim was FALSE. It
+  was committed ~51 seconds before the only ahimsa gate run against rc.13 even
+  started, and that run FAILED assert_foreign_holder_not_killed on all three
+  platforms (macos-14 arm64, macos-15-intel, windows-latest) with the "app did
+  not exit within 120s" signature. rc.13's psutil detection DID identify the
+  foreign holder and log the fail-loud keywords, but the foreign path then
+  opened a MODAL Tk dialog (_show_port_error -> messagebox.showerror) that
+  blocked the full 120s budget on the runners' window server. rc.13 was
+  therefore NOT gate-proven; the foreign-holder path is fixed in rc.15 (fail-
+  loud to stderr, no blocking modal).
 
 ## matika v0.0.4-rc.12
 
@@ -112,9 +163,13 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
   skipped/xfail/deselected/warnings). Paired with manomatika/eyerate v0.0.4-rc.5
   (unchanged) and the ahimsa frozen-artifact gate regression
   (manomatika/ahimsa#124: assert_reclaim_recovers_dead_holder +
-  assert_foreign_holder_not_killed) that proves the reclaim and foreign-holder-
-  protection behavior on the live frozen binary, both install paths. Notes-only
-  GitHub prerelease for QA.
+  assert_foreign_holder_not_killed). CORRECTION (rc.15): on rc.12 the gate
+  proved ONLY the reclaim path (assert_reclaim_recovers_dead_holder was green);
+  the foreign-holder-protection behavior was NOT gate-proven here —
+  assert_foreign_holder_not_killed FAILED on rc.12 on all three platforms (gate
+  run 28482492386). This entry's original claim that the gate proved "the
+  reclaim and foreign-holder-protection behavior" is softened to reclaim-only.
+  Notes-only GitHub prerelease for QA.
 
 ## matika v0.0.4-rc.11
 
