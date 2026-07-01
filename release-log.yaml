@@ -1,5 +1,47 @@
 entries:
   - repo: matika
+    tag: v0.0.4-rc.14
+    date: "2026-06-30"
+    status: published
+    artifact: "none (notes-only GitHub prerelease)"
+    prs: "manomatika/matika#116"
+    summary: >
+      Fourteenth release candidate for matika v0.0.4 — replaces the launcher's
+      bind()-based port-held fallback with a connect()-based probe (closes
+      manomatika/matika#113 for good). rc.13 made the psutil holder-lookup the
+      AUTHORITY for "who holds the port", but still fell back to a bind()
+      probe (_port_available) for "is it held" whenever psutil attributed no
+      holder; CI proved a second SO_REUSEADDR socket binds successfully over
+      an ACTIVE listener on both macOS and Windows, so that fallback could
+      still silently report a genuinely-held foreign port as free in the
+      psutil-blind-spot case. Fix: _port_held(), a connect() probe, is now the
+      SOLE authority for "is the port held" — it tests the kernel listen queue
+      directly and is immune to the SO_REUSEADDR foot-gun (immune for a
+      foreign holder, a healthy instance of our own, and a SIGSTOP'd dead-ours
+      holder alike). psutil + /healthz remain the authority for "whose is it"
+      once held is confirmed. A held-but-not-positively-identified holder
+      (psutil attributes no PID, or _is_manomatika_process returns None) now
+      always fails loud — never falls through to a "free" conclusion, closing
+      the residual gap rc.13 left open. Also fixes ahimsa's own foreign-holder
+      gate fixture (manomatika/ahimsa#125, merged the same day): the fixture
+      had been creating its foreign port holder as a raw socket in the gate
+      driver's OWN process (the direct parent of the app-under-test) rather
+      than an independent sibling process like every other holder fixture in
+      that file — a harness artifact, not a faithful foreign holder. Both
+      fixes verified together on the ahimsa gate against a genuinely
+      independent, psutil-visible foreign holder. Tests cover free (connect
+      refused), held+listener, connect-timeout (ambiguous->held),
+      bind-but-never-listen (platform-dependent — Linux refuses immediately,
+      macOS/BSD times out, verified empirically on both and now documented),
+      foreign-holder fail-loud-never-kill, not-positively-ours (psutil None)
+      fail-loud-never-kill, and reclaim of a dead-ours holder still passing
+      (no regression). Full matika suite 100% clean (607 passed, 0
+      failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
+      v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for QA; pending the
+      ahimsa frozen-artifact gate run across all three platforms and both
+      install arms (dispatched from this repin).
+
+  - repo: matika
     tag: v0.0.4-rc.13
     date: "2026-06-30"
     status: published

@@ -6,43 +6,82 @@ The tag/entry consistency rule is enforced by `ahimsa-validate-releases`.
 
 ---
 
+## matika v0.0.4-rc.14
+
+- **Date:** 2026-06-30
+- **Status:** published
+- **Artifact:** none (notes-only GitHub prerelease)
+- **PRs:** manomatika/matika#116
+- **Summary:** Fourteenth release candidate for matika v0.0.4 — replaces the launcher's
+  bind()-based port-held fallback with a connect()-based probe (closes
+  manomatika/matika#113 for good). rc.13 made the psutil holder-lookup the
+  AUTHORITY for "who holds the port", but still fell back to a bind() probe
+  (_port_available) for "is it held" whenever psutil attributed no holder; CI
+  proved a second SO_REUSEADDR socket binds successfully over an ACTIVE listener
+  on both macOS and Windows, so that fallback could still silently report a
+  genuinely-held foreign port as free in the psutil-blind-spot case. Fix:
+  _port_held(), a connect() probe, is now the SOLE authority for "is the port
+  held" — it tests the kernel listen queue directly and is immune to the
+  SO_REUSEADDR foot-gun (immune for a foreign holder, a healthy instance of our
+  own, and a SIGSTOP'd dead-ours holder alike). psutil + /healthz remain the
+  authority for "whose is it" once held is confirmed. A held-but-not-positively-
+  identified holder (psutil attributes no PID, or _is_manomatika_process returns
+  None) now always fails loud — never falls through to a "free" conclusion,
+  closing the residual gap rc.13 left open. Also fixes ahimsa's own foreign-
+  holder gate fixture (manomatika/ahimsa#125, merged the same day): the fixture
+  had been creating its foreign port holder as a raw socket in the gate driver's
+  OWN process (the direct parent of the app-under-test) rather than an
+  independent sibling process like every other holder fixture in that file — a
+  harness artifact, not a faithful foreign holder. Both fixes verified together
+  on the ahimsa gate against a genuinely independent, psutil-visible foreign
+  holder. Tests cover free (connect refused), held+listener, connect-timeout
+  (ambiguous->held), bind-but-never-listen (platform-dependent — Linux refuses
+  immediately, macOS/BSD times out, verified empirically on both and now
+  documented), foreign-holder fail-loud-never-kill, not-positively-ours (psutil
+  None) fail-loud-never-kill, and reclaim of a dead-ours holder still passing
+  (no regression). Full matika suite 100% clean (607 passed, 0
+  failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
+  v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for QA; pending the
+  ahimsa frozen-artifact gate run across all three platforms and both install
+  arms (dispatched from this repin).
+
 ## matika v0.0.4-rc.13
 
 - **Date:** 2026-06-30
 - **Status:** published
 - **Artifact:** none (notes-only GitHub prerelease)
 - **PRs:** manomatika/matika#115
-- **Summary:** Thirteenth release candidate for matika v0.0.4 — fixes the launcher
-  foreign-holder defect the ahimsa gate caught on rc.12 (gate run 28482492386:
+- **Summary:** Thirteenth release candidate for matika v0.0.4 — fixes the launcher foreign-
+  holder defect the ahimsa gate caught on rc.12 (gate run 28482492386:
   assert_foreign_holder_not_killed FAILED on all three platforms; closes
-  manomatika/matika#113). Root cause: the port-conflict gate keyed off a
-  bind-only probe (_port_available) that sets SO_REUSEADDR; a well-behaved
-  foreign holder ALSO sets SO_REUSEADDR, so two SO_REUSEADDR sockets can bind the
-  same port and bind() succeeds against a genuinely-held port — the probe
-  reported the port FREE, _handle_port_conflict never fired, and the app booted
-  straight through the foreign socket (macOS: 120s hang; Windows: raw uvicorn
-  [Errno 10048] later, never the launcher's fail-loud message). bind() success
-  is not a valid "is this port in use?" test. Fix: a new _resolve_port_conflict()
-  runs EARLY in main() — BEFORE first-run init, DB/alembic stamping, and plugin
+  manomatika/matika#113). Root cause: the port-conflict gate keyed off a bind-
+  only probe (_port_available) that sets SO_REUSEADDR; a well-behaved foreign
+  holder ALSO sets SO_REUSEADDR, so two SO_REUSEADDR sockets can bind the same
+  port and bind() succeeds against a genuinely-held port — the probe reported
+  the port FREE, _handle_port_conflict never fired, and the app booted straight
+  through the foreign socket (macOS: 120s hang; Windows: raw uvicorn [Errno
+  10048] later, never the launcher's fail-loud message). bind() success is not a
+  valid "is this port in use?" test. Fix: a new _resolve_port_conflict() runs
+  EARLY in main() — BEFORE first-run init, DB/alembic stamping, and plugin
   extraction — so a held port fails loud FAST. The psutil holder-lookup
   (_find_port_holder_pid) is now the AUTHORITY for "is the port held, and by
   whom", not the bind probe: no holder + bind ok -> free -> boot; no holder +
-  bind fails -> ambiguous -> fail loud; holder present -> /healthz ->
-  healthy-defer (requires status==ok AND product==ManoMatika) / reclaim-ours /
-  fail-loud-foreign (message keeps the "NOT identified as a ManoMatika process" +
-  "refusing to kill" strings and the holder PID, and never kills). _port_available
-  is downgraded to a documented secondary net (a bind FAILURE is reliable "held"
-  evidence; bind SUCCESS is trusted as "free" only when psutil also finds no
-  holder). The proven-good reclaim path (assert_reclaim_recovers_dead_holder,
-  green on rc.12) is preserved. Also bumps VERSION 0.0.4-rc.11 -> 0.0.4-rc.13 (it
-  was never bumped for rc.12, so the frozen build self-reported the wrong
-  version; VERSION is the single source of truth). Tests cover every branch; a
-  new SO_REUSEADDR foot-gun regression test fails against the pre-fix launcher
-  (DID NOT RAISE SystemExit) and passes with the fix. Full matika suite 100%
-  clean (603 passed, 0 failed/skipped/xfail/deselected/warnings). Paired with
-  manomatika/eyerate v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for
-  QA; gate-proven on the frozen artifact across all three platforms and both
-  install arms.
+  bind fails -> ambiguous -> fail loud; holder present -> /healthz -> healthy-
+  defer (requires status==ok AND product==ManoMatika) / reclaim-ours / fail-
+  loud-foreign (message keeps the "NOT identified as a ManoMatika process" +
+  "refusing to kill" strings and the holder PID, and never kills).
+  _port_available is downgraded to a documented secondary net (a bind FAILURE is
+  reliable "held" evidence; bind SUCCESS is trusted as "free" only when psutil
+  also finds no holder). The proven-good reclaim path
+  (assert_reclaim_recovers_dead_holder, green on rc.12) is preserved. Also bumps
+  VERSION 0.0.4-rc.11 -> 0.0.4-rc.13 (it was never bumped for rc.12, so the
+  frozen build self-reported the wrong version; VERSION is the single source of
+  truth). Tests cover every branch; a new SO_REUSEADDR foot-gun regression test
+  fails against the pre-fix launcher (DID NOT RAISE SystemExit) and passes with
+  the fix. Full matika suite 100% clean (603 passed, 0
+  failed/skipped/xfail/deselected/warnings). Paired with manomatika/eyerate
+  v0.0.4-rc.5 (unchanged). Notes-only GitHub prerelease for QA; gate-proven on
+  the frozen artifact across all three platforms and both install arms.
 
 ## matika v0.0.4-rc.12
 
